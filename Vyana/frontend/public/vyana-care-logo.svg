@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="bgFrame" x1="76" y1="56" x2="444" y2="456" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1A2B46"/>
+      <stop offset="1" stop-color="#0B1428"/>
+    </linearGradient>
+    <linearGradient id="ringStroke" x1="100" y1="72" x2="418" y2="430" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2DD4BF" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#FB7185" stop-opacity="0.45"/>
+    </linearGradient>
+    <linearGradient id="core" x1="118" y1="112" x2="392" y2="388" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2DD4BF"/>
+      <stop offset="0.48" stop-color="#EAF7F4"/>
+      <stop offset="1" stop-color="#F97316"/>
+    </linearGradient>
+    <radialGradient id="shine" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(202 170) rotate(42) scale(184)">
+      <stop stop-color="#FFFFFF" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="24" y="24" width="464" height="464" rx="72" fill="url(#bgFrame)"/>
+  <rect x="26" y="26" width="460" height="460" rx="70" stroke="url(#ringStroke)" stroke-width="4"/>
+
+  <circle cx="256" cy="256" r="168" fill="#0F1B31"/>
+  <circle cx="256" cy="256" r="160" fill="url(#core)"/>
+  <circle cx="256" cy="256" r="160" fill="url(#shine)"/>
+
+  <circle cx="256" cy="256" r="160" stroke="#0A1020" stroke-opacity="0.5" stroke-width="4"/>
+
+  <path d="M168 318C214 286 264 286 320 324" stroke="#C1283A" stroke-width="12" stroke-linecap="round"/>
+  <path d="M146 326H176L188 300L202 346L220 308L238 326H272" stroke="#138F84" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <path d="M198 192C220 160 252 148 286 154C302 157 322 164 338 178" stroke="#B91C34" stroke-width="10" stroke-linecap="round"/>
+  <path d="M194 202C224 174 254 168 284 176C299 181 314 190 326 204" stroke="#E45E6C" stroke-width="7" stroke-linecap="round"/>
+
+  <path d="M252 262C258 224 278 204 308 192C334 182 360 182 382 190" stroke="#FBEDED" stroke-width="10" stroke-linecap="round"/>
+  <path d="M228 274C232 238 242 214 258 196C280 172 306 164 336 168" stroke="#FFF7F7" stroke-width="8" stroke-linecap="round"/>
+
+  <circle cx="292" cy="248" r="45" fill="#FFF7F3"/>
+  <path d="M240 296C266 274 310 274 338 300" stroke="#FFF7F3" stroke-width="18" stroke-linecap="round"/>
+
+  <circle cx="188" cy="156" r="4" fill="#FFF8EA"/>
+  <circle cx="156" cy="188" r="3" fill="#FFF8EA"/>
+  <circle cx="354" cy="142" r="3" fill="#FFF8EA"/>
+  <circle cx="374" cy="178" r="4" fill="#FFF8EA"/>
+</svg>
