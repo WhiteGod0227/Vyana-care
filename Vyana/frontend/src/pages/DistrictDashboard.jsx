@@ -4,6 +4,7 @@ import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer,
 import { AnimatePresence, motion as Motion } from "framer-motion";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import L from "leaflet";
+import toast from "react-hot-toast";
 import api from "../api/axios";
 import LoadingSkeleton from "../components/LoadingSkeleton";
 import EmptyState from "../components/EmptyState";
@@ -27,6 +28,8 @@ function DistrictDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activePatient, setActivePatient] = useState(null);
+  const [reportLoading, setReportLoading] = useState("");
+  const [lastReportName, setLastReportName] = useState("");
 
   const loadData = useCallback(async (showLoading = true) => {
     if (showLoading) setLoading(true);
@@ -85,17 +88,26 @@ function DistrictDashboard() {
     window.print();
   };
 
-  const downloadCsv = () => {
-    const header = ["District", "Total", "High", "Medium", "Low"];
-    const rows = districtStats.map((row) => [row.district, row.total_patients, row.high_risk, row.medium_risk, row.low_risk]);
-    const csv = [header, ...rows].map((r) => r.map((v) => `"${String(v ?? "").replaceAll('"', '""')}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `district-${selectedDistrict}-${Date.now()}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const downloadReport = async (endpoint, loadingKey) => {
+    setReportLoading(loadingKey);
+    try {
+      const res = await api.get(endpoint, { responseType: "blob" });
+      const disposition = res.headers?.["content-disposition"] || "";
+      const match = disposition.match(/filename=([^;]+)/i);
+      const filename = (match?.[1] || `${loadingKey}-${selectedDistrict}.csv`).replace(/"/g, "");
+      const blobUrl = URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(blobUrl);
+      setLastReportName(filename);
+      toast.success("Report download ho gayi ✅");
+    } catch {
+      toast.error("Report download fail ho gaya");
+    } finally {
+      setReportLoading("");
+    }
   };
 
   const runFederatedSimulation = async () => {
@@ -119,9 +131,30 @@ function DistrictDashboard() {
               {districtNames.map((d) => <MenuItem key={d} value={d}>{d}</MenuItem>)}
             </TextField>
             <Button variant="outlined" onClick={() => loadData(true)}>Refresh</Button>
-            <Button variant="outlined" onClick={downloadCsv}>Download CSV</Button>
+            <Button
+              variant="outlined"
+              onClick={() => downloadReport(`/district/${selectedDistrict}/export/csv`, "summary")}
+              disabled={reportLoading === "summary"}
+            >
+              {reportLoading === "summary" ? "Downloading..." : "Patient Summary CSV"}
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => downloadReport(`/district/${selectedDistrict}/export/nrhm`, "nrhm")}
+              disabled={reportLoading === "nrhm"}
+            >
+              {reportLoading === "nrhm" ? "Downloading..." : "NRHM Monthly Report"}
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => downloadReport(`/district/${selectedDistrict}/export/highrisk`, "highrisk")}
+              disabled={reportLoading === "highrisk"}
+            >
+              {reportLoading === "highrisk" ? "Downloading..." : "High Risk Patient List"}
+            </Button>
             <Button variant="contained" onClick={downloadPdf}>Download PDF</Button>
           </div>
+          {lastReportName ? <p className="vy-muted">Last file: {lastReportName}</p> : null}
         </div>
         {loading ? <LoadingSkeleton height={90} /> : null}
         <div className="vy-kpi-grid">

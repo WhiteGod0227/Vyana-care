@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import Alert, Checkup, Patient, Symptom
+from app.models import Alert, Checkup, Patient, PredictiveAlert, Symptom
 from app.schemas import CheckupRecordRequest
 from app.utils.response import error_response, success_response
 
@@ -143,3 +143,33 @@ def get_unacknowledged_alerts(asha_id: int, db: Session = Depends(get_db)):
         return success_response({"alerts": rows})
     except Exception as exc:
         return error_response(f"Failed to fetch alerts: {exc}", 400)
+
+
+@router.get("/{asha_id}/predictive-alerts")
+def get_predictive_alerts(asha_id: int, db: Session = Depends(get_db)):
+    try:
+        rows = (
+            db.query(PredictiveAlert, Patient)
+            .join(Patient, PredictiveAlert.patient_id == Patient.id)
+            .filter(PredictiveAlert.asha_id == asha_id)
+            .order_by(PredictiveAlert.created_at.desc())
+            .limit(100)
+            .all()
+        )
+
+        data = [
+            {
+                "id": pa.id,
+                "patient_id": patient.id,
+                "patient_name": patient.name,
+                "alert_type": pa.alert_type,
+                "risk_level": pa.risk_level,
+                "reason": pa.reason,
+                "linked_alert_id": pa.linked_alert_id,
+                "created_at": pa.created_at.isoformat(),
+            }
+            for pa, patient in rows
+        ]
+        return success_response({"predictive_alerts": data})
+    except Exception as exc:
+        return error_response(f"Failed to fetch predictive alerts: {exc}", 400)

@@ -84,6 +84,19 @@ class Alert(Base):
     asha_worker = relationship("AshaWorker", back_populates="alerts")
 
 
+class PredictiveAlert(Base):
+    __tablename__ = "predictive_alerts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    patient_id: Mapped[int] = mapped_column(ForeignKey("patients.id"), nullable=False, index=True)
+    asha_id: Mapped[int] = mapped_column(ForeignKey("asha_workers.id"), nullable=False, index=True)
+    alert_type: Mapped[str] = mapped_column(String(60), nullable=False, index=True)
+    risk_level: Mapped[str] = mapped_column(String(10), nullable=False)
+    reason: Mapped[str] = mapped_column(Text, nullable=False)
+    linked_alert_id: Mapped[Optional[int]] = mapped_column(ForeignKey("alerts.id"), nullable=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+
 class Checkup(Base):
     __tablename__ = "checkups"
 

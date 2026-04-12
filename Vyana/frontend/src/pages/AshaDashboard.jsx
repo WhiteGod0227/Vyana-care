@@ -17,7 +17,9 @@ function AshaDashboard() {
   const [riskFilter, setRiskFilter] = useState("ALL");
   const [patients, setPatients] = useState([]);
   const [alerts, setAlerts] = useState([]);
+  const [predictiveAlerts, setPredictiveAlerts] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const [pdfDownloading, setPdfDownloading] = useState(false);
   const [checkupSubmitting, setCheckupSubmitting] = useState(false);
   const [checkupForm, setCheckupForm] = useState({
     bp_systolic: "",
@@ -34,12 +36,14 @@ function AshaDashboard() {
     if (showLoading) setLoading(true);
     setError("");
     try {
-      const [patientRes, alertRes] = await Promise.all([
+      const [patientRes, alertRes, predictiveRes] = await Promise.all([
         api.get("/asha/1/patients"),
-        api.get("/asha/1/alerts")
+        api.get("/asha/1/alerts"),
+        api.get("/asha/1/predictive-alerts"),
       ]);
       setPatients(patientRes.data?.data?.patients || []);
       setAlerts(alertRes.data?.data?.alerts || []);
+      setPredictiveAlerts(predictiveRes.data?.data?.predictive_alerts || []);
     } catch {
       setError("Could not load ASHA dashboard data.");
     } finally {
@@ -164,6 +168,28 @@ function AshaDashboard() {
     }
   };
 
+  const downloadPatientPdf = async () => {
+    if (!selectedPatient) return;
+    setPdfDownloading(true);
+    try {
+      const res = await api.get(`/patient/${selectedPatient.id}/export/pdf`, { responseType: "blob" });
+      const disposition = res.headers?.["content-disposition"] || "";
+      const match = disposition.match(/filename=([^;]+)/i);
+      const filename = (match?.[1] || `patient_${selectedPatient.id}_report.pdf`).replace(/"/g, "");
+      const blobUrl = URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(blobUrl);
+      toast.success("Report download ho gayi ✅");
+    } catch {
+      toast.error("Patient PDF download fail ho gaya");
+    } finally {
+      setPdfDownloading(false);
+    }
+  };
+
   return (
     <div className="vy-page">
       <ErrorBanner message={error} onClose={() => setError("")} />
@@ -237,6 +263,21 @@ function AshaDashboard() {
         <AlertPanel alerts={alerts} onAcknowledge={handleAcknowledge} />
       </section>
 
+      <section className="vy-card">
+        <h3>AI Predictions</h3>
+        {predictiveAlerts.length === 0 ? <p className="vy-muted">Abhi koi predictive alert nahi hai.</p> : null}
+        {predictiveAlerts.slice(0, 8).map((item) => (
+          <div key={item.id} className="vy-alert-item" style={{ marginBottom: 8 }}>
+            <strong>{item.patient_name}</strong>
+            <p>{item.reason}</p>
+            <div className="vy-alert-meta">
+              <span>{item.alert_type}</span>
+              <span>{item.risk_level}</span>
+            </div>
+          </div>
+        ))}
+      </section>
+
       <AnimatePresence>
         {selectedPatient ? (
           <Motion.div className="vy-side-sheet-wrap" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedPatient(null)}>
@@ -290,6 +331,9 @@ function AshaDashboard() {
               <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
                 <Button variant="contained" onClick={submitCheckup} disabled={checkupSubmitting}>
                   {checkupSubmitting ? "Saving..." : "Checkup Save Karein"}
+                </Button>
+                <Button variant="outlined" onClick={downloadPatientPdf} disabled={pdfDownloading}>
+                  {pdfDownloading ? "Downloading..." : "PDF Download"}
                 </Button>
                 <Button variant="outlined" onClick={() => toast.success("Follow-up task created")}>Follow-up Schedule</Button>
               </div>

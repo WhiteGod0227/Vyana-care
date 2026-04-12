@@ -1,11 +1,14 @@
 from datetime import datetime, timedelta, timezone
+import csv
+import io
 
 from fastapi import APIRouter, Depends
+from fastapi.responses import StreamingResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import Alert, Patient, Symptom
+from app.models import Alert, AshaWorker, Checkup, Patient, Symptom
 from app.utils.response import error_response, success_response
 
 router = APIRouter(prefix="/district", tags=["district"])
@@ -200,3 +203,192 @@ def district_heatmap(district_name: str, db: Session = Depends(get_db)):
         return success_response({"heatmap": list(grouped.values())})
     except Exception as exc:
         return error_response(f"Failed to get district heatmap: {exc}", 400)
+
+
+def _csv_response(filename: str, rows: list[list[str]]) -> StreamingResponse:
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerows(rows)
+    data = io.BytesIO(buffer.getvalue().encode("utf-8"))
+    return StreamingResponse(
+        data,
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
+
+
+@router.get("/{district_name}/export/csv")
+def export_district_csv(district_name: str, db: Session = Depends(get_db)):
+    snap = _district_snapshot_data(district_name, db)
+    rows = [["Village", "Total Patients", "High Risk"]]
+    heatmap = district_heatmap(district_name, db)
+    payload = heatmap.body.decode("utf-8") if hasattr(heatmap, "body") else ""
+    if payload:
+        import json
+
+        parsed = json.loads(payload)
+        for item in parsed.get("data", {}).get("heatmap", []):
+            rows.append([str(item.get("village", "")), str(item.get("total_patients", 0)), str(item.get("high_risk_count", 0))])
+    rows.append([])
+    rows.append(["District", district_name])
+    rows.append(["Total", str(snap["stats"]["total_patients"])])
+    rows.append(["High", str(snap["stats"]["high_risk"])])
+    rows.append(["Medium", str(snap["stats"]["medium_risk"])])
+    rows.append(["Low", str(snap["stats"]["low_risk"])])
+    filename = f"District_{district_name}_{datetime.now().strftime('%Y%m%d')}.csv"
+    return _csv_response(filename, rows)
+
+
+@router.get("/{district_name}/export/nrhm")
+def export_nrhm(district_name: str, db: Session = Depends(get_db)):
+    now = datetime.now()
+    month_label = now.strftime("%B")
+    year_label = now.strftime("%Y")
+
+    patients = db.query(Patient).filter(func.lower(Patient.district) == district_name.lower()).all()
+    total_registered = len(patients)
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    next_month = (month_start + timedelta(days=32)).replace(day=1)
+
+    high_cases = 0
+    for p in patients:
+        latest = (
+            db.query(Symptom)
+            .filter(Symptom.patient_id == p.id)
+            .order_by(Symptom.timestamp.desc())
+            .first()
+        )
+        if latest and latest.risk_level == "HIGH":
+            high_cases += 1
+
+    district_asha_ids = [
+        p.asha_id
+        for p in patients
+        if p.asha_id is not None
+    ]
+    ashas = db.query(AshaWorker).filter(AshaWorker.id.in_(district_asha_ids) if district_asha_ids else False).all()
+
+    alerts_this_month = (
+        db.query(Alert)
+        .join(Patient, Alert.patient_id == Patient.id)
+        .filter(
+            func.lower(Patient.district) == district_name.lower(),
+            Alert.created_at >= month_start,
+            Alert.created_at < next_month,
+        )
+        .all()
+    )
+
+    response_minutes = []
+    for a in alerts_this_month:
+        if a.acknowledged and a.acknowledged_at:
+            mins = (a.acknowledged_at - a.created_at).total_seconds() / 60
+            response_minutes.append(mins)
+    avg_response = round(sum(response_minutes) / len(response_minutes), 2) if response_minutes else 0
+
+    village_map: dict[str, dict[str, int]] = {}
+    for p in patients:
+        if p.village not in village_map:
+            village_map[p.village] = {"total": 0, "high": 0}
+        village_map[p.village]["total"] += 1
+        latest = (
+            db.query(Symptom)
+            .filter(Symptom.patient_id == p.id)
+            .order_by(Symptom.timestamp.desc())
+            .first()
+        )
+        if latest and latest.risk_level == "HIGH":
+            village_map[p.village]["high"] += 1
+
+    rows: list[list[str]] = []
+    rows.append(["NRHM Monthly Report"])
+    rows.append([f"District: {district_name}"])
+    rows.append([f"Period: {month_label} {year_label}"])
+    rows.append([])
+
+    rows.append(["Total Patients registered", str(total_registered)])
+    rows.append(["High Risk Cases", str(high_cases)])
+    rows.append(["Alerts Fired This Month", str(len(alerts_this_month))])
+    rows.append(["Avg Response Time (minutes)", str(avg_response)])
+    rows.append([])
+
+    rows.append(["ASHA Name", "Patients", "Checkups Done", "Alerts Responded"])
+    for asha in ashas:
+        asha_patients = db.query(Patient).filter(Patient.asha_id == asha.id, func.lower(Patient.district) == district_name.lower()).all()
+        asha_patient_ids = [p.id for p in asha_patients]
+        checkups_done = db.query(Checkup).filter(Checkup.asha_id == asha.id).count()
+        asha_alerts = db.query(Alert).filter(Alert.asha_id == asha.id, Alert.patient_id.in_(asha_patient_ids) if asha_patient_ids else False).all()
+        responded = len([a for a in asha_alerts if a.acknowledged])
+        rows.append([asha.name, str(len(asha_patients)), str(checkups_done), str(responded)])
+    rows.append([])
+
+    rows.append(["Village", "Total", "High Risk"])
+    for village, stats in sorted(village_map.items()):
+        rows.append([village, str(stats["total"]), str(stats["high"])])
+
+    filename = f"NRHM_{district_name}_{month_label}_{year_label}.csv"
+    return _csv_response(filename, rows)
+
+
+@router.get("/{district_name}/export/highrisk")
+def export_highrisk(district_name: str, db: Session = Depends(get_db)):
+    patients = db.query(Patient).filter(func.lower(Patient.district) == district_name.lower()).all()
+    rows = [["Name", "Age", "Village", "Pregnancy Week", "Risk Score", "Risk Reason", "Last Alert Date", "ASHA Worker", "Days Since Checkup"]]
+
+    now = _utc_now_naive()
+    compiled = []
+    for p in patients:
+        latest = (
+            db.query(Symptom)
+            .filter(Symptom.patient_id == p.id)
+            .order_by(Symptom.timestamp.desc())
+            .first()
+        )
+        if not latest or latest.risk_level != "HIGH":
+            continue
+        latest_alert = (
+            db.query(Alert)
+            .filter(Alert.patient_id == p.id)
+            .order_by(Alert.created_at.desc())
+            .first()
+        )
+        latest_checkup = (
+            db.query(Checkup)
+            .filter(Checkup.patient_id == p.id)
+            .order_by(Checkup.created_at.desc())
+            .first()
+        )
+        days_since = (now - latest_checkup.created_at).days if latest_checkup else 999
+        asha = db.query(AshaWorker).filter(AshaWorker.id == p.asha_id).first()
+        compiled.append(
+            {
+                "name": p.name,
+                "age": p.age,
+                "village": p.village,
+                "week": p.pregnancy_week,
+                "score": latest.risk_score,
+                "reason": latest.primary_reason,
+                "alert_date": latest_alert.created_at.strftime("%d-%m-%Y %H:%M") if latest_alert else "N/A",
+                "asha": asha.name if asha else "N/A",
+                "days": days_since,
+            }
+        )
+
+    compiled.sort(key=lambda item: item["score"], reverse=True)
+    for item in compiled:
+        rows.append(
+            [
+                item["name"],
+                str(item["age"]),
+                item["village"],
+                str(item["week"]),
+                str(item["score"]),
+                item["reason"],
+                item["alert_date"],
+                item["asha"],
+                str(item["days"]),
+            ]
+        )
+
+    filename = f"HighRisk_{district_name}_{datetime.now().strftime('%Y%m%d')}.csv"
+    return _csv_response(filename, rows)

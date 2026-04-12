@@ -2,6 +2,7 @@ import json
 import os
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import BackgroundTasks
@@ -10,9 +11,10 @@ from sqlalchemy.orm import Session
 
 import firebase_admin
 from firebase_admin import credentials, messaging
+from twilio.rest import Client
 
 from app.database import SessionLocal
-from app.models import Alert, AshaWorker
+from app.models import Alert, AshaWorker, Patient
 
 load_dotenv()
 
@@ -21,73 +23,142 @@ def _utc_now_naive() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
-def _init_firebase() -> bool:
-    if firebase_admin._apps:
-        return True
-
-    raw = os.getenv("FIREBASE_CREDENTIALS_JSON", "").strip()
-    if not raw:
-        print("[ALERT] FIREBASE_CREDENTIALS_JSON missing, skipping push notifications")
-        return False
-
+def init_firebase() -> bool:
     try:
-        if raw.startswith("{"):
-            cred_dict = json.loads(raw)
+        if firebase_admin._apps:
+            print("[FIREBASE] ✅ Working")
+            return True
+
+        cred_value = os.getenv("FIREBASE_CREDENTIALS_JSON", "").strip()
+        if not cred_value:
+            print("[FIREBASE] ❌ Failed: FIREBASE_CREDENTIALS_JSON missing")
+            return False
+
+        if cred_value.startswith("{"):
+            cred_dict = json.loads(cred_value)
             cred = credentials.Certificate(cred_dict)
         else:
-            cred = credentials.Certificate(raw)
+            raw_path = Path(cred_value).expanduser()
+            if raw_path.is_absolute():
+                cred_path = raw_path
+            else:
+                project_root = Path(__file__).resolve().parents[2]
+                cred_path = (project_root / raw_path).resolve()
+            cred = credentials.Certificate(str(cred_path))
         firebase_admin.initialize_app(cred)
+        print("[FIREBASE] ✅ Working")
         return True
     except Exception as exc:
-        print(f"[ALERT] Firebase initialization failed: {exc}")
+        print(f"[FIREBASE] ❌ Failed: {exc}")
         return False
 
 
-def _send_notification(device_token: str, patient_name: str, reason: str, patient_id: int, risk_score: int, alert_id: int, asha_name: str):
-    if not _init_firebase() or not device_token:
-        return
+def send_push_notification(device_token: str, title: str, body: str, data: dict | None = None) -> bool:
+    try:
+        if not init_firebase():
+            return False
 
-    message = messaging.Message(
-        notification=messaging.Notification(
-            title="⚠️ High Risk Patient Alert",
-            body=f"{patient_name} — {reason}",
-        ),
-        token=device_token,
-        data={
-            "patient_id": str(patient_id),
-            "risk_score": str(risk_score),
-            "alert_id": str(alert_id),
-        },
-    )
+        if not device_token:
+            print("[FIREBASE] ❌ Failed: missing device token")
+            return False
+
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title=title,
+                body=body,
+            ),
+            token=device_token,
+            data={k: str(v) for k, v in (data or {}).items()},
+        )
+
+        response = messaging.send(message)
+        print(f"[FIREBASE] ✅ Working ({response})")
+        return True
+    except Exception as exc:
+        print(f"[FIREBASE] ❌ Failed: {exc}")
+        return False
+
+
+def _send_sms(to_number: str, message: str) -> bool:
+    if not to_number:
+        print("[TWILIO] Missing destination number - skipped")
+        return False
+
+    sid = os.getenv("TWILIO_ACCOUNT_SID", "").strip()
+    token = os.getenv("TWILIO_AUTH_TOKEN", "").strip()
+    from_number = os.getenv("TWILIO_FROM_NUMBER", "").strip()
+    if not sid or not token or not from_number:
+        print("[TWILIO] Missing credentials - skipped")
+        return False
 
     try:
-        messaging.send(message)
-        print(f"[ALERT] Firebase notification sent to {asha_name}")
-    except Exception as exc:
-        print(f"[ALERT] Firebase send failed: {exc}")
+        client = Client(sid, token)
+        client.messages.create(body=message, from_=from_number, to=to_number)
+        print(f"[TWILIO] SMS sent to {to_number}")
+        return True
+    except Exception as exc:  # noqa: BLE001
+        print(f"[TWILIO] SMS failed: {exc}")
+        return False
 
 
-def _escalate_if_unacknowledged(alert_id: int, patient_name: str, village: str, district: str):
-    time.sleep(60)
+def _resolve_demo_phone(phone: str) -> str:
+    demo_phone = os.getenv("TWILIO_TO_NUMBER", "").strip()
+    return demo_phone or phone
+
+
+def escalation_chain(
+    alert_id: int,
+    patient_name: str,
+    village: str,
+    district: str,
+    patient_family_phone: str,
+    phc_nurse_phone: str,
+):
+    wait_time = int(os.getenv("DEMO_ESCALATION_SECONDS", "60"))
+
+    time.sleep(wait_time)
     db = SessionLocal()
     try:
         alert = db.query(Alert).filter(Alert.id == alert_id).first()
-        if alert and not alert.acknowledged:
-            alert.escalation_level = 2
-            db.commit()
-            print(f"[ESCALATION] Level 2 triggered for {patient_name}")
-            print(f"ESCALATION L2 — Family SMS would be sent for patient {patient_name}")
+        if not alert or alert.acknowledged:
+            print(f"[ESCALATION] Alert {alert_id} acknowledged - stopping")
+            return
+
+        alert.escalation_level = 2
+        db.commit()
+
+        family_msg = (
+            f"Vyana Care: {patient_name} ko turant madad chahiye. "
+            f"ASHA didi aa rahi hain. Emergency mein 108 dial karein."
+        )
+        sms_ok = _send_sms(_resolve_demo_phone(patient_family_phone), family_msg)
+        if sms_ok:
+            print("[TWILIO L2] ✅ SMS sent")
+        else:
+            print("[TWILIO L2] ❌ SMS failed")
     finally:
         db.close()
 
-    time.sleep(60)
+    time.sleep(wait_time)
     db = SessionLocal()
     try:
         alert = db.query(Alert).filter(Alert.id == alert_id).first()
-        if alert and not alert.acknowledged:
-            alert.escalation_level = 3
-            db.commit()
-            print(f"ESCALATION L3 — 108 Ambulance triggered for {patient_name} at {village}, {district}")
+        if not alert or alert.acknowledged:
+            print(f"[ESCALATION] Alert {alert_id} acknowledged at L2 - stopping")
+            return
+
+        alert.escalation_level = 3
+        db.commit()
+
+        nurse_msg = (
+            f"Vyana Care EMERGENCY: {patient_name}, {village} — PHC nurse turant action karein."
+        )
+        sms_ok = _send_sms(_resolve_demo_phone(phc_nurse_phone), nurse_msg)
+        if sms_ok:
+            print("[TWILIO L3] ✅ PHC SMS sent")
+        else:
+            print("[TWILIO L3] ❌ PHC SMS failed")
+        print(f"[108] Ambulance logged for {patient_name} at {village}")
     finally:
         db.close()
 
@@ -116,23 +187,39 @@ def trigger_alert(
     db.refresh(alert)
 
     asha = db.query(AshaWorker).filter(AshaWorker.id == asha_id).first()
+    sent_push = False
     if asha:
-        _send_notification(
+        sent_push = send_push_notification(
             device_token=asha.device_token or "",
-            patient_name=patient_name,
-            reason=reason,
-            patient_id=patient_id,
-            risk_score=risk_score,
-            alert_id=alert.id,
-            asha_name=asha.name,
+            title="⚠ High Risk Alert",
+            body=f"{patient_name} — {reason}",
+            data={
+                "patient_id": str(patient_id),
+                "alert_id": str(alert.id),
+                "risk_score": str(risk_score),
+            },
         )
 
+    if not sent_push:
+        fallback_msg = (
+            f"⚠ Vyana Care Alert: {patient_name}\n"
+            f"Risk: HIGH - {reason}\n"
+            "Turant action karein."
+        )
+        _send_sms(_resolve_demo_phone(asha.phone if asha else ""), fallback_msg)
+
+    patient = db.query(Patient).filter(Patient.id == patient_id).first()
+    patient_family_phone = _resolve_demo_phone(patient.phone_number if patient else "")
+    phc_nurse_phone = _resolve_demo_phone(asha.phone if asha else "")
+
     background_tasks.add_task(
-        _escalate_if_unacknowledged,
+        escalation_chain,
         alert.id,
         patient_name,
         village,
         district,
+        patient_family_phone,
+        phc_nurse_phone,
     )
 
     return alert

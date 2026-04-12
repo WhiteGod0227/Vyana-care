@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi import Request
+from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
@@ -20,27 +21,39 @@ from app.routers.federated import router as federated_router
 from app.routers.hmis import router as hmis_router
 from app.routers.ivr import router as ivr_router
 from app.routers.patient import router as patient_router
+from app.routers.scheduler import router as scheduler_router
 from app.routers.sync import router as sync_router
 from app.routers.symptom import router as symptom_router
 from app.models import Alert, AwaazSubmission, Patient, Symptom
 from app.database import SessionLocal
+from app.services.scheduler_service import start_scheduler, stop_scheduler
 from app.utils.response import success_response
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Vyana Care Backend", version="1.0.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    start_scheduler()
+    yield
+    stop_scheduler()
+
+
+app = FastAPI(title="Vyana Care Backend", version="1.0.0", lifespan=lifespan)
 APP_STARTED_AT = datetime.utcnow()
 API_CALLS_TODAY = {"date": datetime.utcnow().date().isoformat(), "count": 0}
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:5173", "http://127.0.0.1:3000"],
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.include_router(patient_router)
+app.include_router(scheduler_router)
 app.include_router(symptom_router)
 app.include_router(auth_router)
 app.include_router(awaaz_router)
