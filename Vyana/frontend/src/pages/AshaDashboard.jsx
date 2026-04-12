@@ -18,6 +18,14 @@ function AshaDashboard() {
   const [patients, setPatients] = useState([]);
   const [alerts, setAlerts] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const [checkupSubmitting, setCheckupSubmitting] = useState(false);
+  const [checkupForm, setCheckupForm] = useState({
+    bp_systolic: "",
+    bp_diastolic: "",
+    weight_kg: "",
+    notes: "",
+    next_visit_date: "",
+  });
   const [shareData, setShareData] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -123,6 +131,39 @@ function AshaDashboard() {
     }
   };
 
+  const openPatientSheet = (patient) => {
+    setSelectedPatient(patient);
+    setCheckupForm({
+      bp_systolic: "",
+      bp_diastolic: "",
+      weight_kg: "",
+      notes: "घर पर follow-up किया गया",
+      next_visit_date: "",
+    });
+  };
+
+  const submitCheckup = async () => {
+    if (!selectedPatient) return;
+    setCheckupSubmitting(true);
+    try {
+      await api.post("/asha/checkup/record", {
+        patient_id: selectedPatient.id,
+        asha_id: 1,
+        bp_systolic: Number(checkupForm.bp_systolic || 0),
+        bp_diastolic: Number(checkupForm.bp_diastolic || 0),
+        weight_kg: Number(checkupForm.weight_kg || 0),
+        notes: checkupForm.notes || "Routine visit",
+        next_visit_date: checkupForm.next_visit_date || undefined,
+      });
+      toast.success("Checkup record save ho gaya");
+      fetchAll(false);
+    } catch {
+      toast.error("Checkup save nahi ho saka");
+    } finally {
+      setCheckupSubmitting(false);
+    }
+  };
+
   return (
     <div className="vy-page">
       <ErrorBanner message={error} onClose={() => setError("")} />
@@ -181,7 +222,7 @@ function AshaDashboard() {
         {!loading && filteredPatients.length === 0 ? <EmptyState text="No patients found for selected filters." /> : null}
         <div className="vy-patient-grid">
           {filteredPatients.map((p) => (
-            <Motion.button whileHover={{ y: -2 }} className="vy-patient-card" key={p.id} onClick={() => setSelectedPatient(p)}>
+            <Motion.button whileHover={{ y: -2 }} className="vy-patient-card" key={p.id} onClick={() => openPatientSheet(p)}>
               <div className="row"><b>{p.name}</b><span className={`lvl ${String(p.risk_level).toLowerCase()}`}>{p.risk_level}</span></div>
               <div>{p.village}, {p.district}</div>
               <div>Week {p.pregnancy_week}</div>
@@ -205,7 +246,53 @@ function AshaDashboard() {
               <p>Week {selectedPatient.pregnancy_week}</p>
               <p>Risk: {selectedPatient.risk_level}</p>
               <p>Reason: {selectedPatient.primary_risk_reason || "N/A"}</p>
-              <Button variant="contained" onClick={() => toast.success("Follow-up task created")}>Follow-up Schedule</Button>
+              <div className="vy-two-col" style={{ marginTop: 8 }}>
+                <TextField
+                  size="small"
+                  label="Systolic"
+                  type="number"
+                  value={checkupForm.bp_systolic}
+                  onChange={(e) => setCheckupForm((prev) => ({ ...prev, bp_systolic: e.target.value }))}
+                />
+                <TextField
+                  size="small"
+                  label="Diastolic"
+                  type="number"
+                  value={checkupForm.bp_diastolic}
+                  onChange={(e) => setCheckupForm((prev) => ({ ...prev, bp_diastolic: e.target.value }))}
+                />
+                <TextField
+                  size="small"
+                  label="Weight (kg)"
+                  type="number"
+                  value={checkupForm.weight_kg}
+                  onChange={(e) => setCheckupForm((prev) => ({ ...prev, weight_kg: e.target.value }))}
+                />
+                <TextField
+                  size="small"
+                  label="Next Visit"
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  value={checkupForm.next_visit_date}
+                  onChange={(e) => setCheckupForm((prev) => ({ ...prev, next_visit_date: e.target.value }))}
+                />
+              </div>
+              <TextField
+                size="small"
+                multiline
+                minRows={2}
+                fullWidth
+                sx={{ mt: 1 }}
+                label="Notes"
+                value={checkupForm.notes}
+                onChange={(e) => setCheckupForm((prev) => ({ ...prev, notes: e.target.value }))}
+              />
+              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                <Button variant="contained" onClick={submitCheckup} disabled={checkupSubmitting}>
+                  {checkupSubmitting ? "Saving..." : "Checkup Save Karein"}
+                </Button>
+                <Button variant="outlined" onClick={() => toast.success("Follow-up task created")}>Follow-up Schedule</Button>
+              </div>
             </Motion.div>
           </Motion.div>
         ) : null}

@@ -31,6 +31,34 @@ Return ONLY a JSON object, nothing else:
  confidence: 'high/medium/low',
  original_complaints: 'one line summary in English'}"""
 
+KEYWORD_SYMPTOM_MAP = {
+    "sir dard": "headache",
+    "headache": "headache",
+    "sujan": "swelling",
+    "swelling": "swelling",
+    "aankhon": "blurred_vision",
+    "andhera": "blurred_vision",
+    "blurred": "blurred_vision",
+    "khoon": "bleeding",
+    "bleeding": "bleeding",
+    "bukhar": "fever",
+    "fever": "fever",
+    "bachcha kam hil": "reduced_fetal_movement",
+    "reduced fetal": "reduced_fetal_movement",
+    "seene": "chest_pain",
+    "chest pain": "chest_pain",
+    "saans": "difficulty_breathing",
+    "breathing": "difficulty_breathing",
+    "pet dard": "abdominal_pain",
+    "abdominal": "abdominal_pain",
+    "thakaan": "fatigue",
+    "fatigue": "fatigue",
+    "ulti": "nausea",
+    "nausea": "nausea",
+    "chakkar": "dizziness",
+    "dizziness": "dizziness",
+}
+
 
 def _extract_json_object(raw: str) -> dict:
     text = raw.strip()
@@ -48,13 +76,31 @@ def _extract_json_object(raw: str) -> dict:
     return json.loads(candidate)
 
 
+def _extract_symptoms_from_keywords(transcription_text: str) -> dict:
+    text = transcription_text.lower()
+    detected = []
+    for keyword, symptom in KEYWORD_SYMPTOM_MAP.items():
+        if keyword in text and symptom not in detected:
+            detected.append(symptom)
+
+    return {
+        "symptoms": detected,
+        "confidence": "medium" if detected else "low",
+        "original_complaints": transcription_text[:140],
+        "gemini_json_error": True,
+    }
+
+
 def extract_symptoms_from_text(transcription_text: str, gemini_api_key: str) -> dict:
     genai.configure(api_key=gemini_api_key)
 
     model_names = [
+        "models/gemini-2.5-flash",
+        "models/gemini-2.0-flash",
+        "models/gemini-2.0-flash-001",
+        "models/gemini-flash-latest",
         "gemini-1.5-flash",
         "models/gemini-1.5-flash",
-        "models/gemini-2.0-flash",
     ]
 
     full_prompt = f"{SYSTEM_PROMPT}\n\nInput text:\n{transcription_text}"
@@ -68,7 +114,10 @@ def extract_symptoms_from_text(transcription_text: str, gemini_api_key: str) -> 
             for model_name in model_names:
                 try:
                     model = genai.GenerativeModel(model_name)
-                    response = model.generate_content(full_prompt)
+                    response = model.generate_content(
+                        full_prompt,
+                        generation_config={"response_mime_type": "application/json"},
+                    )
                     break
                 except Exception as inner_exc:
                     last_error = inner_exc
@@ -94,12 +143,7 @@ def extract_symptoms_from_text(transcription_text: str, gemini_api_key: str) -> 
             break
         except Exception:
             if attempt == 1:
-                gemini_error = True
-                parsed = {
-                    "symptoms": [],
-                    "confidence": "low",
-                    "original_complaints": "Unable to parse symptom extraction",
-                }
+                return _extract_symptoms_from_keywords(transcription_text)
 
     symptoms = parsed.get("symptoms", [])
     confidence = parsed.get("confidence", "low")

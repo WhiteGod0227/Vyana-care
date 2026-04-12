@@ -573,6 +573,23 @@ function PatientPortal() {
           ))}
         </div>
       </section>
+
+      <Button
+        variant="contained"
+        onClick={() => setDemoMode((v) => !v)}
+        sx={{
+          position: "fixed",
+          right: 20,
+          bottom: 20,
+          zIndex: 1200,
+          borderRadius: "999px",
+          px: 2,
+          py: 1.1,
+          boxShadow: "0 12px 32px rgba(15, 23, 42, 0.28)",
+        }}
+      >
+        {demoMode ? "Demo Band Karein" : "Demo Chalayen"}
+      </Button>
     </div>
   );
 }

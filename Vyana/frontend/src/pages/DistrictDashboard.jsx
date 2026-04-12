@@ -85,6 +85,19 @@ function DistrictDashboard() {
     window.print();
   };
 
+  const downloadCsv = () => {
+    const header = ["District", "Total", "High", "Medium", "Low"];
+    const rows = districtStats.map((row) => [row.district, row.total_patients, row.high_risk, row.medium_risk, row.low_risk]);
+    const csv = [header, ...rows].map((r) => r.map((v) => `"${String(v ?? "").replaceAll('"', '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `district-${selectedDistrict}-${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const runFederatedSimulation = async () => {
     try {
       const res = await api.post("/federated/simulate-training");
@@ -106,6 +119,7 @@ function DistrictDashboard() {
               {districtNames.map((d) => <MenuItem key={d} value={d}>{d}</MenuItem>)}
             </TextField>
             <Button variant="outlined" onClick={() => loadData(true)}>Refresh</Button>
+            <Button variant="outlined" onClick={downloadCsv}>Download CSV</Button>
             <Button variant="contained" onClick={downloadPdf}>Download PDF</Button>
           </div>
         </div>
