@@ -1,0 +1,20 @@
+{
+  "name": "Vyana Care",
+  "short_name": "Vyana",
+  "theme_color": "#0f172a",
+  "background_color": "#f1f5f9",
+  "display": "standalone",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/vyana-care-logo-enhanced.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/vyana-care-logo-enhanced.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

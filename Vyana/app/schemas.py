@@ -136,3 +136,79 @@ class AwaazNurseItem(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class OfflineQueuedAction(BaseModel):
+    action_type: Literal["symptom_report", "checkup_record", "alert_acknowledge"]
+    payload: dict[str, Any]
+    local_timestamp: datetime
+    local_id: str
+
+
+class OfflineSyncBatchRequest(BaseModel):
+    device_id: str
+    queued_actions: list[OfflineQueuedAction]
+
+
+class BluetoothImportRequest(BaseModel):
+    base64_data: str
+    source_asha_id: str
+
+
+class FederatedSubmitRequest(BaseModel):
+    model_weights: dict[str, float]
+    training_samples: int = Field(ge=1)
+    local_accuracy: float = Field(ge=0, le=100)
+    node_id: str
+
+
+class AbhaVerifyRequest(BaseModel):
+    abha_id: str
+
+
+class AbhaLinkRequest(BaseModel):
+    patient_id: int
+    abha_id: str
+
+
+class TwilioTestCallRequest(BaseModel):
+    to_number: str | None = None
+    message: str | None = None
+    use_local_webhook: bool = False
+
+
+class AmbulanceDispatchRequest(BaseModel):
+    patient_name: str
+    village: str
+    district: str
+    landmark: str | None = None
+    phone: str
+    emergency_type: str = "maternal"
+    gps_lat: float | None = None
+    gps_lng: float | None = None
+
+
+class RequestOtpPayload(BaseModel):
+    phone: str
+    role: Literal["patient", "asha", "district", "admin"]
+
+
+class VerifyOtpPayload(BaseModel):
+    phone: str
+    otp: str
+    role: Literal["patient", "asha", "district", "admin"]
+
+
+class RefreshTokenPayload(BaseModel):
+    refresh_token: str
+
+
+class PatientConsentRequest(BaseModel):
+    patient_id: int
+    consent_type: Literal["data_collection", "ai_processing", "asha_sharing", "research_anonymized"]
+    granted: bool
+
+
+class PatientDeleteRequestPayload(BaseModel):
+    patient_id: int
+    reason: str

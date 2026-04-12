@@ -21,6 +21,9 @@ function DistrictDashboard() {
   const [selectedDistrict, setSelectedDistrict] = useState("Barmer");
   const [snapshot, setSnapshot] = useState(null);
   const [districtStats, setDistrictStats] = useState([]);
+  const [ivrLogs, setIvrLogs] = useState([]);
+  const [federatedStats, setFederatedStats] = useState(null);
+  const [simResult, setSimResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activePatient, setActivePatient] = useState(null);
@@ -35,6 +38,12 @@ function DistrictDashboard() {
       ]);
       setDistrictStats(districtRes.data?.data?.district_stats || []);
       setSnapshot(snapshotRes.data?.data || null);
+      const [ivrRes, fedRes] = await Promise.all([
+        api.get("/ivr/logs"),
+        api.get("/federated/stats"),
+      ]);
+      setIvrLogs(ivrRes.data?.data?.logs || []);
+      setFederatedStats(fedRes.data?.data || null);
     } catch {
       setError("Could not load district dashboard data.");
     } finally {
@@ -74,6 +83,15 @@ function DistrictDashboard() {
 
   const downloadPdf = () => {
     window.print();
+  };
+
+  const runFederatedSimulation = async () => {
+    try {
+      const res = await api.post("/federated/simulate-training");
+      setSimResult(res.data?.data || null);
+    } catch {
+      setError("Federated simulation failed.");
+    }
   };
 
   return (
@@ -170,6 +188,58 @@ function DistrictDashboard() {
               );
             })}
           </MapContainer>
+        </div>
+      </section>
+
+      <section className="vy-grid-two">
+        <div className="vy-card">
+          <h3>IVR Calls</h3>
+          <div className="vy-kpi-grid" style={{ marginTop: 12 }}>
+            <div className="kpi"><span>Total Calls</span><b>{ivrLogs.length}</b></div>
+            <div className="kpi high"><span>High Risk IVR</span><b>{ivrLogs.filter((l) => l.risk_result === "HIGH").length}</b></div>
+            <div className="kpi med"><span>Callbacks</span><b>{ivrLogs.filter((l) => (l.symptoms_collected || []).length > 2).length}</b></div>
+          </div>
+          <div className="vy-table-wrap" style={{ marginTop: 12 }}>
+            <table className="vy-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Duration</th>
+                  <th>Symptoms</th>
+                  <th>Risk</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ivrLogs.slice(0, 10).map((row) => (
+                  <tr key={`${row.timestamp}-${row.caller_number}`}>
+                    <td>{new Date(row.timestamp).toLocaleString()}</td>
+                    <td>{row.duration || 0}s</td>
+                    <td>{(row.symptoms_collected || []).join(", ") || "-"}</td>
+                    <td>{row.risk_result || "-"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="vy-card">
+          <h3>AI Intelligence (Federated Learning)</h3>
+          <p>Privacy-preserving learning - no raw patient data shared.</p>
+          <div className="vy-kpi-grid" style={{ marginTop: 12 }}>
+            <div className="kpi"><span>Global Model</span><b>v{federatedStats?.global_model_version || 0}</b></div>
+            <div className="kpi"><span>District Nodes</span><b>{federatedStats?.total_nodes || 0}</b></div>
+            <div className="kpi"><span>Accuracy</span><b>{federatedStats?.global_accuracy || 0}%</b></div>
+          </div>
+          <Button variant="contained" sx={{ mt: 2 }} onClick={runFederatedSimulation}>Simulate Training</Button>
+          {simResult ? (
+            <div className="vy-json-preview" style={{ marginTop: 12 }}>
+              Before: {simResult.before_accuracy}%{"\n"}
+              After: {simResult.after_accuracy}%{"\n"}
+              Improvement: +{simResult.improvement}%{"\n"}
+              Patient data shared: NEVER
+            </div>
+          ) : null}
         </div>
       </section>
 

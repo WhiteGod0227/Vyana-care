@@ -110,6 +110,70 @@ h4,
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
+.vy-offline-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1400;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 14px;
+    color: #422006;
+    background: linear-gradient(90deg, #fbbf24, #fde68a);
+    border-bottom: 1px solid rgba(146, 64, 14, 0.22);
+    font-weight: 600;
+}
+
+.vy-offline-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vy-offline-badge {
+    min-width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    background: #422006;
+    color: #fff;
+    font-size: 12px;
+}
+
+.vy-json-preview {
+    margin: 0;
+    padding: 10px;
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid #334155;
+    color: #dbeafe;
+    max-height: 220px;
+    overflow: auto;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+}
+
+.vy-table-wrap {
+    width: 100%;
+    overflow: auto;
+}
+
+.vy-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.vy-table th,
+.vy-table td {
+    border-bottom: 1px solid #334155;
+    text-align: left;
+    padding: 10px 8px;
+    font-size: 13px;
+}
+
 .vy-navbar-left {
     display: flex;
     align-items: center;

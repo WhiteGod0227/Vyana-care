@@ -5,6 +5,7 @@ from sqlalchemy import (
     Boolean,
     Date,
     DateTime,
+    Float,
     ForeignKey,
     Integer,
     String,
@@ -142,3 +143,142 @@ class AwaazReaction(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 
     submission = relationship("AwaazSubmission", back_populates="reactions")
+
+
+class DeviceSyncState(Base):
+    __tablename__ = "device_sync_states"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    device_id: Mapped[str] = mapped_column(String(120), nullable=False, unique=True, index=True)
+    last_sync_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class OfflineActionLog(Base):
+    __tablename__ = "offline_action_logs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    device_id: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
+    local_id: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
+    action_type: Mapped[str] = mapped_column(String(40), nullable=False)
+    server_id: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    local_timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class IvrCallLog(Base):
+    __tablename__ = "ivr_call_logs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    caller_number: Mapped[str] = mapped_column(String(30), nullable=False, index=True)
+    patient_id: Mapped[Optional[int]] = mapped_column(ForeignKey("patients.id"), nullable=True)
+    symptoms_collected: Mapped[list] = mapped_column(JSONB, default=list, nullable=False)
+    risk_result: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    duration_seconds: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    callback_requested: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class FederatedModel(Base):
+    __tablename__ = "federated_models"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    node_id: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
+    model_version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    local_weights: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
+    training_samples: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    accuracy: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class GlobalModel(Base):
+    __tablename__ = "global_models"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, index=True)
+    aggregated_weights: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
+    participating_nodes: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    global_accuracy: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class AmbulanceDispatch(Base):
+    __tablename__ = "ambulance_dispatches"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    patient_name: Mapped[str] = mapped_column(String(120), nullable=False)
+    village: Mapped[str] = mapped_column(String(120), nullable=False)
+    district: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
+    phone_masked: Mapped[str] = mapped_column(String(30), nullable=False)
+    emergency_type: Mapped[str] = mapped_column(String(40), nullable=False, default="maternal")
+    gps_lat: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    gps_lng: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    eta_minutes: Mapped[int] = mapped_column(Integer, nullable=False, default=23)
+    status: Mapped[str] = mapped_column(String(30), nullable=False, default="dispatched")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    user_role: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    action: Mapped[str] = mapped_column(String(120), nullable=False)
+    resource_type: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    resource_id: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    ip_address: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class PatientConsent(Base):
+    __tablename__ = "patient_consents"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    patient_id: Mapped[int] = mapped_column(ForeignKey("patients.id"), nullable=False, index=True)
+    consent_type: Mapped[str] = mapped_column(String(60), nullable=False)
+    granted: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class PatientDeleteRequest(Base):
+    __tablename__ = "patient_delete_requests"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    patient_id: Mapped[int] = mapped_column(ForeignKey("patients.id"), nullable=False, index=True)
+    reason: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="queued")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class OtpSession(Base):
+    __tablename__ = "otp_sessions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    phone: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
+    role: Mapped[str] = mapped_column(String(40), nullable=False)
+    otp_code: Mapped[str] = mapped_column(String(10), nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class RefreshToken(Base):
+    __tablename__ = "refresh_tokens"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    token: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    phone: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
+    role: Mapped[str] = mapped_column(String(40), nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    revoked: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class JwtBlacklist(Base):
+    __tablename__ = "jwt_blacklist"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    token: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)

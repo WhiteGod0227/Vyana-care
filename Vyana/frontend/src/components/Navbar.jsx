@@ -15,6 +15,7 @@ const navLinks = [
   { path: "/awaaz", label: "Vaani" },
   { path: "/asha", label: "ASHA" },
   { path: "/district", label: "District" },
+  { path: "/integrations", label: "Integrations" },
 ];
 
 function Navbar() {

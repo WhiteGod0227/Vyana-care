@@ -2,6 +2,7 @@
 import { Button, MenuItem, TextField } from "@mui/material";
 import { AnimatePresence, motion as Motion } from "framer-motion";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { QRCodeSVG } from "qrcode.react";
 import toast from "react-hot-toast";
 import api from "../api/axios";
 import AlertPanel from "../components/AlertPanel";
@@ -17,6 +18,7 @@ function AshaDashboard() {
   const [patients, setPatients] = useState([]);
   const [alerts, setAlerts] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const [shareData, setShareData] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -91,6 +93,36 @@ function AshaDashboard() {
     URL.revokeObjectURL(url);
   };
 
+  const handleBluetoothExport = async () => {
+    try {
+      const res = await api.post("/sync/bluetooth-export/1");
+      const data = res.data?.data?.base64_data || "";
+      setShareData(data);
+      if (navigator.share) {
+        await navigator.share({ title: "Vyana Care Data", text: data });
+      } else {
+        await navigator.clipboard.writeText(data);
+        toast.success("Data clipboard mein copy ho gaya");
+      }
+    } catch {
+      toast.error("Bluetooth export failed");
+    }
+  };
+
+  const handleImportFile = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      await api.post("/sync/bluetooth-import", { base64_data: text.trim(), source_asha_id: "1" });
+      toast.success("Data import successful");
+      fetchAll(false);
+    } catch {
+      toast.error("Data import failed");
+    }
+  };
+
   return (
     <div className="vy-page">
       <ErrorBanner message={error} onClose={() => setError("")} />
@@ -106,9 +138,20 @@ function AshaDashboard() {
               {riskFilterOptions.map((r) => <MenuItem key={r} value={r}>{r}</MenuItem>)}
             </TextField>
             <Button variant="outlined" onClick={() => fetchAll(true)}>Refresh</Button>
+            <Button variant="outlined" onClick={handleBluetoothExport}>Bluetooth se Share Karein</Button>
+            <Button variant="outlined" component="label">
+              Data Import Karein
+              <input type="file" hidden accept=".txt,.json" onChange={handleImportFile} />
+            </Button>
             <Button variant="contained" onClick={downloadCsv}>Report Download</Button>
           </div>
         </div>
+        {shareData ? (
+          <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 12 }}>
+            <QRCodeSVG value={shareData} size={120} bgColor="#0f172a" fgColor="#22d3ee" />
+            <p style={{ margin: 0, fontSize: 12, color: "#94a3b8" }}>Export package ready ({shareData.length} chars). Dusri ASHA scan karke import kar sakti hain.</p>
+          </div>
+        ) : null}
         <div className="vy-kpi-grid">
           <div className="kpi"><span>Total Patients</span><b>{stats.total}</b></div>
           <div className="kpi high"><span>High Risk</span><b>{stats.high}</b></div>

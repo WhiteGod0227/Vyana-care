@@ -4,6 +4,7 @@ import base64
 import hashlib
 import hmac
 import json
+import secrets
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -110,3 +111,16 @@ def build_user_payload(token_payload: dict[str, Any]) -> dict[str, Any]:
         "issued_at": issued_at.isoformat(),
         "expires_at": expires_at.isoformat(),
     }
+
+
+def generate_otp() -> str:
+    return f"{secrets.randbelow(1000000):06d}"
+
+
+def create_refresh_token(phone: str, role: str, days: int = 30) -> tuple[str, datetime]:
+    issued_at = _now()
+    expires_at = issued_at + timedelta(days=days)
+    raw = f"{phone}:{role}:{int(issued_at.timestamp())}:{secrets.token_urlsafe(24)}"
+    digest = hashlib.sha256(raw.encode("utf-8")).hexdigest()
+    token = _b64encode(digest.encode("utf-8"))
+    return token, expires_at
