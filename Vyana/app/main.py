@@ -36,9 +36,22 @@ Base.metadata.create_all(bind=engine)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Auto-seed database if empty
+    try:
+        db = SessionLocal()
+        if db.query(Patient).count() == 0:
+            print("[STARTUP] Empty database detected. Running auto-seed...")
+            from seed import run_seed
+            run_seed()
+            print("[STARTUP] Auto-seed complete!")
+        db.close()
+    except Exception as e:
+        print(f"[STARTUP] Auto-seed check warning: {e}")
+
     start_scheduler()
     yield
     stop_scheduler()
+
 
 
 from app.core.config import settings
