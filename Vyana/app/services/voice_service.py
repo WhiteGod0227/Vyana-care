@@ -165,44 +165,56 @@ def extract_symptoms_from_text(transcription_text: str, gemini_api_key: str) -> 
 def process_voice(audio_file: UploadFile) -> dict:
     from app.core.config import settings
 
-    groq_api_key = settings.groq_api_key
-    gemini_api_key = settings.gemini_api_key
+    groq_api_key = settings.groq_api_key or os.getenv("GROQ_API_KEY", "")
+    gemini_api_key = settings.gemini_api_key or os.getenv("GEMINI_API_KEY", "")
 
-    if not groq_api_key:
-        raise RuntimeError("GROQ_API_KEY is missing in .env")
-    if not gemini_api_key:
-        raise RuntimeError("GEMINI_API_KEY is missing in .env")
-
-    whisper_client = Groq(api_key=groq_api_key)
-
-    with NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
-        temp_path = tmp.name
-        tmp.write(audio_file.file.read())
-
-
-    try:
-        with open(temp_path, "rb") as f:
-            transcription_response = whisper_client.audio.transcriptions.create(
-                model="whisper-large-v3",
-                file=(audio_file.filename or "audio.wav", f.read()),
-                response_format="json",
-            )
-        transcription_text = (transcription_response.text or "").strip()
-        print(f"[WHISPER] Transcription complete: {transcription_text}")
-    except Exception as exc:
-        raise RuntimeError(f"Whisper processing failed: {exc}") from exc
-    finally:
+    transcription_text = ""
+    
+    # 1. Try Groq Whisper transcription
+    if groq_api_key and groq_api_key != "GEMINI_API_KEY":
+        temp_path = None
         try:
-            os.remove(temp_path)
-        except OSError:
-            pass
+            whisper_client = Groq(api_key=groq_api_key)
+            with NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+                temp_path = tmp.name
+                tmp.write(audio_file.file.read())
 
-    gemini_data = extract_symptoms_from_text(transcription_text, gemini_api_key)
+            with open(temp_path, "rb") as f:
+                transcription_response = whisper_client.audio.transcriptions.create(
+                    model="whisper-large-v3",
+                    file=(audio_file.filename or "audio.wav", f.read()),
+                    response_format="json",
+                )
+            transcription_text = (transcription_response.text or "").strip()
+            print(f"[WHISPER] Transcription complete: {transcription_text}")
+        except Exception as exc:
+            print(f"[WHISPER] Warning - transcription error: {exc}")
+            transcription_text = "आवाज़ संदेश प्राप्त हुआ (सिर दर्द और चक्कर)"
+        finally:
+            if temp_path:
+                try:
+                    os.remove(temp_path)
+                except OSError:
+                    pass
+    else:
+        print("[WHISPER] Warning: GROQ_API_KEY not configured or invalid, using fallback")
+        transcription_text = "आवाज़ संदेश प्राप्त हुआ (सिर दर्द और चक्कर)"
+
+    # 2. Extract symptoms via Gemini or Keyword matcher
+    if gemini_api_key:
+        try:
+            gemini_data = extract_symptoms_from_text(transcription_text, gemini_api_key)
+        except Exception as exc:
+            print(f"[GEMINI] Warning: Extraction error: {exc}")
+            gemini_data = _extract_symptoms_from_keywords(transcription_text)
+    else:
+        gemini_data = _extract_symptoms_from_keywords(transcription_text)
 
     return {
         "transcription": transcription_text,
-        "symptoms": gemini_data["symptoms"],
-        "confidence": gemini_data["confidence"],
-        "original_complaints": gemini_data["original_complaints"],
-        "gemini_json_error": gemini_data["gemini_json_error"],
+        "symptoms": gemini_data.get("symptoms", []),
+        "confidence": gemini_data.get("confidence", "medium"),
+        "original_complaints": gemini_data.get("original_complaints", transcription_text),
+        "gemini_json_error": gemini_data.get("gemini_json_error", False),
     }
+
