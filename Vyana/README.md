@@ -1,6 +1,18 @@
-# Vyana Care - AI Maternal Health Platform
+# 🌸 Vyana Care — AI Maternal Health Platform
+
+[![Live App](https://img.shields.io/badge/Live%20App-Vercel-success?style=for-the-badge&logo=vercel)](https://frontend-ayushs-projects-76f1503f.vercel.app)
+[![Live Backend](https://img.shields.io/badge/Live%20API-Render-informational?style=for-the-badge&logo=render)](https://vyana-care.onrender.com)
+[![API Docs](https://img.shields.io/badge/Swagger-OpenAPI-brightgreen?style=for-the-badge&logo=swagger)](https://vyana-care.onrender.com/docs)
+
+> **Live Deployment Links:**
+> - 📱 **Live Web Application (Vercel):** [https://frontend-ayushs-projects-76f1503f.vercel.app](https://frontend-ayushs-projects-76f1503f.vercel.app)
+> - ⚡ **Live Backend API (Render):** [https://vyana-care.onrender.com](https://vyana-care.onrender.com)
+> - 📖 **Interactive Swagger API Docs:** [https://vyana-care.onrender.com/docs](https://vyana-care.onrender.com/docs)
+
+---
 
 Vyana Care is an AI-assisted maternal health system designed for rural frontline workflows. It combines patient reporting (voice/text/IVR), ASHA triage, district analytics, community audio support (Vaani), offline sync, and production-grade integration scaffolding.
+
 
 ## Problem
 India faces preventable maternal risks where early symptom escalation and care coordination are delayed in rural settings.
