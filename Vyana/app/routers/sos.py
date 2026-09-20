@@ -68,7 +68,6 @@ def trigger_maternal_sos(
                 asha_id=asha_id,
                 risk_score=99,
                 risk_level="HIGH",
-                risk_reason=risk_reason,
                 escalation_level=1,
                 created_at=datetime.utcnow(),
                 acknowledged=False,
@@ -79,6 +78,7 @@ def trigger_maternal_sos(
             alert_id = alert.id
         except Exception as alert_err:
             print(f"[SOS] Alert insert warning: {alert_err}")
+
 
         # 3. Twilio Outreach (if configured, or simulated)
         twilio_status = "simulated"
