@@ -63,12 +63,12 @@ API_CALLS_TODAY = {"date": datetime.utcnow().date().isoformat(), "count": 0}
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.all_allowed_origins if settings.all_allowed_origins else ["*"],
-    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
-
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1|.*\.vercel\.app|.*\.onrender\.com)(:\d+)?$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 app.include_router(patient_router)
 app.include_router(scheduler_router)
