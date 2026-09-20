@@ -1,9 +1,9 @@
 import requests
 
 tests = [
-    ('GET', 'http://127.0.0.1:8000/health'),
-    ('GET', 'http://127.0.0.1:8000/patient/1'),
-    ('GET', 'http://127.0.0.1:8000/asha/1/patients'),
+    ('GET', 'http://127.0.0.1:8001/health'),
+    ('GET', 'http://127.0.0.1:8001/patient/1'),
+    ('GET', 'http://127.0.0.1:8001/asha/1/patients'),
 ]
 
 for method, url in tests:

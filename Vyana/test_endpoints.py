@@ -5,7 +5,7 @@ from pprint import pprint
 
 import httpx
 
-BASE = "http://127.0.0.1:8000"
+BASE = "http://127.0.0.1:8001"
 
 
 def build_valid_wav(duration_seconds: int = 1, sample_rate: int = 16000) -> io.BytesIO:

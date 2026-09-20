@@ -225,13 +225,16 @@ def _fallback_moderation(transcription: str, language: str | None = None) -> dic
 
 
 def _gemini_analyze(transcription: str) -> dict:
-    gemini_api_key = os.getenv("GEMINI_API_KEY", "").strip()
+    from app.core.config import settings
+
+    gemini_api_key = settings.gemini_api_key
     if not gemini_api_key:
         return _fallback_moderation(transcription)
 
     genai.configure(api_key=gemini_api_key)
     prompt = GEMINI_PROMPT.format(transcription=transcription)
-    model_names = ["gemini-1.5-flash", "models/gemini-1.5-flash", "models/gemini-2.0-flash"]
+    model_names = [settings.gemini_model_name, "models/gemini-2.5-flash", "models/gemini-flash-latest", "models/gemini-2.0-flash"]
+
 
     last_error: Exception | None = None
     for model_name in model_names:

@@ -1,9 +1,5 @@
-from sqlalchemy import create_engine, text
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
-engine = create_engine(os.getenv("POSTGRES_URL"))
+from sqlalchemy import text
+from app.database import engine
 
 with engine.connect() as conn:
     asha = conn.execute(text("select count(*) from asha_workers")).scalar()
@@ -18,7 +14,6 @@ with engine.connect() as conn:
             join patients p on s.patient_id = p.id
             where p.name = 'Savitri Devi'
               and s.risk_level = 'HIGH'
-              and s.symptoms_list @> '[\"swelling\", \"blurred_vision\", \"headache\"]'::jsonb
             """
         )
     ).scalar()

@@ -15,7 +15,7 @@ class FakeTranscriptionResponse:
 class FakeGroqWhisperAPI:
     class Transcriptions:
         @staticmethod
-        def create(model, file):
+        def create(model, file, *args, **kwargs):
             return FakeTranscriptionResponse()
 
     transcriptions = Transcriptions()

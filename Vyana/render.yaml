@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: vyana-care-backend
+    env: python
+    buildCommand: "pip install --upgrade pip && pip install -r requirements.txt"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    plan: starter
+    region: singapore
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: POSTGRES_URL
+        fromDatabase:
+          name: vyana-care-db
+          property: connectionString
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL_NAME
+        value: models/gemini-2.5-flash
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_FROM_NUMBER
+        sync: false
+      - key: TWILIO_TO_NUMBER
+        sync: false
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: VYANA_AUTH_SECRET
+        generateValue: true
+      - key: DEMO_ESCALATION_SECONDS
+        value: "60"
+      - key: ALLOWED_ORIGINS
+        value: "https://vyana-care.vercel.app,https://vyana-care.netlify.app"
+
+databases:
+  - name: vyana-care-db
+    plan: starter
+    region: singapore
+    databaseName: vyana_care
+    user: vyana

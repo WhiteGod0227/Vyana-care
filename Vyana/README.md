@@ -31,6 +31,12 @@ India faces preventable maternal risks where early symptom escalation and care c
 - OTP auth flow with refresh tokens and blacklist support.
 - Consent, delete-request, and data export endpoints for DPDP-aligned workflow.
 
+## Environment Configuration & Production Deployment
+All credentials across AI services, telephony, database, and notifications are managed via environment variables. See [ENV_SETUP_GUIDE.md](file:///c:/Desktop/Vyana%20care/Vyana/ENV_SETUP_GUIDE.md) for full documentation on swapping sandbox/demo keys with production accounts.
+
+- **Backend Template**: [`.env.example`](file:///c:/Desktop/Vyana%20care/Vyana/.env.example)
+- **Frontend Template**: [`frontend/.env.example`](file:///c:/Desktop/Vyana%20care/Vyana/frontend/.env.example)
+
 ## Setup
 1. Clone repository.
 2. Create virtual environment and install backend deps:
@@ -39,9 +45,10 @@ India faces preventable maternal risks where early symptom escalation and care c
 	.\.venv\Scripts\Activate.ps1
 	pip install -r requirements.txt
 	```
-3. Configure env vars:
+3. Configure environment variables:
 	```powershell
 	copy .env.example .env
+	cd frontend && copy .env.example .env && cd ..
 	```
 4. Run backend:
 	```powershell
@@ -57,6 +64,7 @@ India faces preventable maternal risks where early symptom escalation and care c
 	```powershell
 	python seed.py
 	```
+
 
 ## API Snapshot
 - Core: /patient, /symptom, /asha, /alert, /district, /awaaz

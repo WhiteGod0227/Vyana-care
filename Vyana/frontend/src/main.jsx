@@ -9,10 +9,15 @@ import theme from "./theme";
 import "./index.css";
 
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(() => {
-      // Service worker registration failures are non-blocking.
-    });
+  window.addEventListener("load", async () => {
+    // Prevent stale cached bundles from old service workers during local development.
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(registrations.map((registration) => registration.unregister()));
+
+    if (window.caches) {
+      const cacheKeys = await window.caches.keys();
+      await Promise.all(cacheKeys.map((key) => window.caches.delete(key)));
+    }
   });
 }
 

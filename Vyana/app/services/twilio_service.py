@@ -1,14 +1,14 @@
-import os
 from xml.sax.saxutils import escape
 
 from twilio.base.exceptions import TwilioRestException
 from twilio.http.http_client import TwilioHttpClient
 from twilio.rest import Client
 
+from app.core.config import settings
+
 
 def twilio_is_configured() -> bool:
-    required = ("TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_FROM_NUMBER", "TWILIO_TO_NUMBER")
-    return all(os.getenv(name, "").strip() for name in required)
+    return settings.twilio_is_configured()
 
 
 def _build_twiml(message: str) -> str:
@@ -23,10 +23,10 @@ def place_test_call(
     message: str | None = None,
     use_local_webhook: bool = False,
 ) -> dict:
-    account_sid = os.getenv("TWILIO_ACCOUNT_SID", "").strip()
-    auth_token = os.getenv("TWILIO_AUTH_TOKEN", "").strip()
-    from_number = os.getenv("TWILIO_FROM_NUMBER", "").strip()
-    default_to_number = os.getenv("TWILIO_TO_NUMBER", "").strip()
+    account_sid = settings.twilio_account_sid
+    auth_token = settings.twilio_auth_token
+    from_number = settings.twilio_from_number
+    default_to_number = settings.twilio_to_number
 
     if not all([account_sid, auth_token, from_number]):
         raise ValueError("Missing Twilio configuration. Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_FROM_NUMBER.")
@@ -44,7 +44,7 @@ def place_test_call(
 
     try:
         if use_local_webhook:
-            webhook_url = os.getenv("TWILIO_WEBHOOK_URL", "").strip()
+            webhook_url = settings.twilio_webhook_url
             if not webhook_url:
                 raise ValueError("use_local_webhook=true requires TWILIO_WEBHOOK_URL to be set to a public URL.")
             call = client.calls.create(to=destination_number, from_=from_number, url=webhook_url)
@@ -62,4 +62,4 @@ def place_test_call(
         "from_number": from_number,
         "to_number": destination_number,
         "message": call_message,
-    }
+    }

@@ -1,4 +1,36 @@
-uploads/
+# Environment and secrets
 .env
+.env.*
+!.env.example
+*.env
+*.env.local
+
+# Firebase credentials & private service account keys
+*-firebase-adminsdk-*.json
+*.pem
+*.key
+*.cert
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Python cache & artifacts
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Static uploads & temporary media
+uploads/
+temp_audio/
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

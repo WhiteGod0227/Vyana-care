@@ -1,6 +1,6 @@
 import requests
 
-r = requests.get('http://127.0.0.1:8000/asha/1/patients', timeout=3)
+r = requests.get('http://127.0.0.1:8001/asha/1/patients', timeout=3)
 print(f'Status: {r.status_code}')
 if r.status_code == 200:
     data = r.json()

@@ -163,8 +163,10 @@ def extract_symptoms_from_text(transcription_text: str, gemini_api_key: str) -> 
 
 
 def process_voice(audio_file: UploadFile) -> dict:
-    groq_api_key = os.getenv("GROQ_API_KEY", "")
-    gemini_api_key = os.getenv("GEMINI_API_KEY", "")
+    from app.core.config import settings
+
+    groq_api_key = settings.groq_api_key
+    gemini_api_key = settings.gemini_api_key
 
     if not groq_api_key:
         raise RuntimeError("GROQ_API_KEY is missing in .env")
@@ -176,6 +178,7 @@ def process_voice(audio_file: UploadFile) -> dict:
     with NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
         temp_path = tmp.name
         tmp.write(audio_file.file.read())
+
 
     try:
         with open(temp_path, "rb") as f:

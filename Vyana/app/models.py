@@ -8,6 +8,7 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     Integer,
+    JSON,
     String,
     Text,
 )
@@ -15,6 +16,8 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+JSONType = JSON().with_variant(JSONB, "postgresql")
 
 
 class AshaWorker(Base):
@@ -56,7 +59,7 @@ class Symptom(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     patient_id: Mapped[int] = mapped_column(ForeignKey("patients.id"), nullable=False, index=True)
-    symptoms_list: Mapped[list] = mapped_column(JSONB, default=list, nullable=False)
+    symptoms_list: Mapped[list] = mapped_column(JSONType, default=list, nullable=False)
     input_type: Mapped[str] = mapped_column(String(20), nullable=False)
     transcription: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     risk_score: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -134,7 +137,7 @@ class AwaazSubmission(Base):
     ai_overall_score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)
     ai_rejection_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     ai_analysis_summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    helpful_topics: Mapped[list] = mapped_column(JSONB, default=list, nullable=False)
+    helpful_topics: Mapped[list] = mapped_column(JSONType, default=list, nullable=False)
     nurse_id: Mapped[Optional[int]] = mapped_column(ForeignKey("asha_workers.id"), nullable=True)
     nurse_decision: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     nurse_rejection_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
@@ -184,7 +187,7 @@ class IvrCallLog(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     caller_number: Mapped[str] = mapped_column(String(30), nullable=False, index=True)
     patient_id: Mapped[Optional[int]] = mapped_column(ForeignKey("patients.id"), nullable=True)
-    symptoms_collected: Mapped[list] = mapped_column(JSONB, default=list, nullable=False)
+    symptoms_collected: Mapped[list] = mapped_column(JSONType, default=list, nullable=False)
     risk_result: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     duration_seconds: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     callback_requested: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
@@ -197,7 +200,7 @@ class FederatedModel(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     node_id: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
     model_version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
-    local_weights: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
+    local_weights: Mapped[dict] = mapped_column(JSONType, default=dict, nullable=False)
     training_samples: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     accuracy: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
@@ -208,7 +211,7 @@ class GlobalModel(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, index=True)
-    aggregated_weights: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
+    aggregated_weights: Mapped[dict] = mapped_column(JSONType, default=dict, nullable=False)
     participating_nodes: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     global_accuracy: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)

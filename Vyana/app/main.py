@@ -20,8 +20,10 @@ from app.routers.district import router as district_router
 from app.routers.federated import router as federated_router
 from app.routers.hmis import router as hmis_router
 from app.routers.ivr import router as ivr_router
+from app.routers.knowledge import router as knowledge_router
 from app.routers.patient import router as patient_router
 from app.routers.scheduler import router as scheduler_router
+from app.routers.sos import router as sos_router
 from app.routers.sync import router as sync_router
 from app.routers.symptom import router as symptom_router
 from app.models import Alert, AwaazSubmission, Patient, Symptom
@@ -39,14 +41,17 @@ async def lifespan(app: FastAPI):
     stop_scheduler()
 
 
+from app.core.config import settings
+
 app = FastAPI(title="Vyana Care Backend", version="1.0.0", lifespan=lifespan)
 APP_STARTED_AT = datetime.utcnow()
 API_CALLS_TODAY = {"date": datetime.utcnow().date().isoformat(), "count": 0}
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:5173", "http://127.0.0.1:3000"],
-    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?$",
+    allow_origins=settings.all_allowed_origins if settings.all_allowed_origins else ["*"],
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
+
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -67,6 +72,8 @@ app.include_router(abha_router)
 app.include_router(hmis_router)
 app.include_router(ambulance_router)
 app.include_router(admin_router)
+app.include_router(knowledge_router)
+app.include_router(sos_router)
 
 Path("uploads").mkdir(exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")

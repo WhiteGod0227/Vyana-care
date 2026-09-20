@@ -1,22 +1,18 @@
 import json
-import os
 import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from dotenv import load_dotenv
 from fastapi import BackgroundTasks
-
 from sqlalchemy.orm import Session
 
 import firebase_admin
 from firebase_admin import credentials, messaging
 from twilio.rest import Client
 
+from app.core.config import settings
 from app.database import SessionLocal
 from app.models import Alert, AshaWorker, Patient
-
-load_dotenv()
 
 
 def _utc_now_naive() -> datetime:
@@ -26,12 +22,12 @@ def _utc_now_naive() -> datetime:
 def init_firebase() -> bool:
     try:
         if firebase_admin._apps:
-            print("[FIREBASE] ✅ Working")
+            print("[FIREBASE] [OK] Working")
             return True
 
-        cred_value = os.getenv("FIREBASE_CREDENTIALS_JSON", "").strip()
+        cred_value = settings.firebase_credentials_json.strip()
         if not cred_value:
-            print("[FIREBASE] ❌ Failed: FIREBASE_CREDENTIALS_JSON missing")
+            print("[FIREBASE] [FAIL] Failed: FIREBASE_CREDENTIALS_JSON missing")
             return False
 
         if cred_value.startswith("{"):
@@ -46,10 +42,10 @@ def init_firebase() -> bool:
                 cred_path = (project_root / raw_path).resolve()
             cred = credentials.Certificate(str(cred_path))
         firebase_admin.initialize_app(cred)
-        print("[FIREBASE] ✅ Working")
+        print("[FIREBASE] [OK] Working")
         return True
     except Exception as exc:
-        print(f"[FIREBASE] ❌ Failed: {exc}")
+        print(f"[FIREBASE] [FAIL] Failed: {exc}")
         return False
 
 
@@ -59,7 +55,7 @@ def send_push_notification(device_token: str, title: str, body: str, data: dict 
             return False
 
         if not device_token:
-            print("[FIREBASE] ❌ Failed: missing device token")
+            print("[FIREBASE] [FAIL] Failed: missing device token")
             return False
 
         message = messaging.Message(
@@ -72,10 +68,10 @@ def send_push_notification(device_token: str, title: str, body: str, data: dict 
         )
 
         response = messaging.send(message)
-        print(f"[FIREBASE] ✅ Working ({response})")
+        print(f"[FIREBASE] [OK] Working ({response})")
         return True
     except Exception as exc:
-        print(f"[FIREBASE] ❌ Failed: {exc}")
+        print(f"[FIREBASE] [FAIL] Failed: {exc}")
         return False
 
 
@@ -84,9 +80,9 @@ def _send_sms(to_number: str, message: str) -> bool:
         print("[TWILIO] Missing destination number - skipped")
         return False
 
-    sid = os.getenv("TWILIO_ACCOUNT_SID", "").strip()
-    token = os.getenv("TWILIO_AUTH_TOKEN", "").strip()
-    from_number = os.getenv("TWILIO_FROM_NUMBER", "").strip()
+    sid = settings.twilio_account_sid
+    token = settings.twilio_auth_token
+    from_number = settings.twilio_from_number
     if not sid or not token or not from_number:
         print("[TWILIO] Missing credentials - skipped")
         return False
@@ -102,7 +98,7 @@ def _send_sms(to_number: str, message: str) -> bool:
 
 
 def _resolve_demo_phone(phone: str) -> str:
-    demo_phone = os.getenv("TWILIO_TO_NUMBER", "").strip()
+    demo_phone = settings.twilio_to_number
     return demo_phone or phone
 
 
@@ -114,7 +110,7 @@ def escalation_chain(
     patient_family_phone: str,
     phc_nurse_phone: str,
 ):
-    wait_time = int(os.getenv("DEMO_ESCALATION_SECONDS", "60"))
+    wait_time = settings.demo_escalation_seconds
 
     time.sleep(wait_time)
     db = SessionLocal()
@@ -133,9 +129,9 @@ def escalation_chain(
         )
         sms_ok = _send_sms(_resolve_demo_phone(patient_family_phone), family_msg)
         if sms_ok:
-            print("[TWILIO L2] ✅ SMS sent")
+            print("[TWILIO L2] [OK] SMS sent")
         else:
-            print("[TWILIO L2] ❌ SMS failed")
+            print("[TWILIO L2] [FAIL] SMS failed")
     finally:
         db.close()
 
@@ -151,13 +147,13 @@ def escalation_chain(
         db.commit()
 
         nurse_msg = (
-            f"Vyana Care EMERGENCY: {patient_name}, {village} — PHC nurse turant action karein."
+            f"Vyana Care EMERGENCY: {patient_name}, {village} -- PHC nurse turant action karein."
         )
         sms_ok = _send_sms(_resolve_demo_phone(phc_nurse_phone), nurse_msg)
         if sms_ok:
-            print("[TWILIO L3] ✅ PHC SMS sent")
+            print("[TWILIO L3] [OK] PHC SMS sent")
         else:
-            print("[TWILIO L3] ❌ PHC SMS failed")
+            print("[TWILIO L3] [FAIL] PHC SMS failed")
         print(f"[108] Ambulance logged for {patient_name} at {village}")
     finally:
         db.close()

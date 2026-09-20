@@ -1,4 +1,4 @@
-﻿@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
 :root {
     --vy-bg: #0a0f1e;
     --vy-paper: #111827;
@@ -2189,3 +2189,915 @@ h4,
         text-align: center;
     }
 }
+
+/* ==========================================================================
+   VYANA CARE - WARM, TRUSTWORTHY GLASSMORPHIC MATERNAL COMPANION DESIGN
+   ========================================================================== */
+
+:root {
+    --vy-teal-primary: #0D5C63;
+    --vy-teal-dark: #083E43;
+    --vy-teal-light: #167D86;
+    --vy-teal-soft: #EBF7F8;
+    --vy-teal-glow: rgba(13, 92, 99, 0.22);
+
+    --vy-coral-primary: #FF6B6B;
+    --vy-coral-dark: #E04D4D;
+    --vy-coral-light: #FFA3A3;
+    --vy-coral-soft: #FFF0F0;
+    --vy-coral-glow: rgba(255, 107, 107, 0.28);
+
+    --vy-sage-green: #2A9D8F;
+    --vy-sage-soft: #EAF5F3;
+    --vy-sun-yellow: #F4A261;
+    --vy-sun-soft: #FEF6EC;
+
+    --vy-warm-bg: #F5FAF9;
+    --vy-warm-bg-alt: #EDF6F5;
+    
+    --vy-glass-card: rgba(255, 255, 255, 0.82);
+    --vy-glass-card-hover: rgba(255, 255, 255, 0.94);
+    --vy-glass-border: rgba(255, 255, 255, 0.9);
+    --vy-glass-border-subtle: rgba(13, 92, 99, 0.12);
+    --vy-glass-shadow: 0 12px 34px rgba(13, 92, 99, 0.08);
+    --vy-glass-shadow-lg: 0 20px 50px rgba(13, 92, 99, 0.13);
+    --vy-glass-blur: blur(18px);
+
+    --vy-font-heading: "Plus Jakarta Sans", "Poppins", "Hind", sans-serif;
+    --vy-font-body: "Hind", "Poppins", "Plus Jakarta Sans", sans-serif;
+    --vy-font-devanagari: "Hind", sans-serif;
+    
+    --vy-text-main: #1E293B;
+    --vy-text-body: #334155;
+    --vy-text-muted: #64748B;
+    --vy-text-light: #94A3B8;
+}
+
+/* App container */
+.vy-maternal-app {
+    min-height: 100vh;
+    font-family: var(--vy-font-body);
+    color: var(--vy-text-main);
+    background: 
+        radial-gradient(circle at 10% 8%, rgba(255, 107, 107, 0.08), transparent 35%),
+        radial-gradient(circle at 90% 15%, rgba(13, 92, 99, 0.10), transparent 40%),
+        radial-gradient(circle at 50% 85%, rgba(42, 157, 143, 0.07), transparent 45%),
+        linear-gradient(180deg, #FAFDFD 0%, #F0F7F6 50%, #F5F9F8 100%);
+    background-attachment: fixed;
+    padding-bottom: 110px;
+}
+
+.vy-container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Header & Glass Navigation */
+.vy-glass-nav {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    backdrop-filter: var(--vy-glass-blur);
+    -webkit-backdrop-filter: var(--vy-glass-blur);
+    background: rgba(255, 255, 255, 0.85);
+    border-bottom: 1px solid var(--vy-glass-border-subtle);
+    box-shadow: 0 4px 20px rgba(13, 92, 99, 0.05);
+    padding: 12px 0;
+    transition: all 0.3s ease;
+}
+
+.vy-nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.vy-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+.vy-brand-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--vy-teal-primary), var(--vy-teal-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    box-shadow: 0 6px 16px var(--vy-teal-glow);
+    font-size: 22px;
+}
+
+.vy-brand-text h1 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 800;
+    color: var(--vy-teal-primary);
+    font-family: var(--vy-font-heading);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+}
+
+.vy-brand-text span {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--vy-coral-primary);
+    letter-spacing: 0.02em;
+}
+
+.vy-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Language Toggle Pill */
+.vy-lang-pill {
+    display: flex;
+    background: var(--vy-teal-soft);
+    border: 1px solid rgba(13, 92, 99, 0.15);
+    border-radius: 50px;
+    padding: 3px;
+    box-shadow: inset 0 2px 4px rgba(13, 92, 99, 0.05);
+}
+
+.vy-lang-btn {
+    border: none;
+    background: transparent;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--vy-teal-primary);
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.vy-lang-btn.active {
+    background: var(--vy-teal-primary);
+    color: #ffffff;
+    box-shadow: 0 3px 10px var(--vy-teal-glow);
+}
+
+/* Connectivity Pill */
+.vy-status-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(13, 92, 99, 0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.vy-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.vy-status-dot.online {
+    background: var(--vy-sage-green);
+    box-shadow: 0 0 8px rgba(42, 157, 143, 0.6);
+}
+
+.vy-status-dot.offline {
+    background: var(--vy-coral-primary);
+    box-shadow: 0 0 8px rgba(255, 107, 107, 0.6);
+    animation: vyBlink 1.8s infinite;
+}
+
+/* SOS Header Button */
+.vy-header-sos-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, var(--vy-coral-primary), var(--vy-coral-dark));
+    color: #ffffff;
+    border: none;
+    border-radius: 50px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 16px var(--vy-coral-glow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vy-header-sos-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+/* Hero Section */
+.vy-hero-section {
+    padding: 32px 0 24px;
+    text-align: center;
+}
+
+.vy-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--vy-teal-soft);
+    border: 1px solid rgba(13, 92, 99, 0.15);
+    color: var(--vy-teal-primary);
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.vy-hero-title {
+    font-family: var(--vy-font-heading);
+    font-size: 38px;
+    font-weight: 800;
+    color: var(--vy-teal-primary);
+    line-height: 1.2;
+    margin: 0 0 12px;
+    letter-spacing: -0.02em;
+}
+
+.vy-hero-title .highlight-coral {
+    color: var(--vy-coral-primary);
+}
+
+.vy-hero-subtitle {
+    font-size: 17px;
+    color: var(--vy-text-body);
+    max-width: 640px;
+    margin: 0 auto 28px;
+    line-height: 1.55;
+    font-weight: 500;
+}
+
+/* Large Central Voice Assistant Card */
+.vy-voice-card {
+    background: var(--vy-glass-card);
+    backdrop-filter: var(--vy-glass-blur);
+    -webkit-backdrop-filter: var(--vy-glass-blur);
+    border: 1px solid var(--vy-glass-border);
+    border-radius: 28px;
+    padding: 36px 24px;
+    box-shadow: var(--vy-glass-shadow-lg);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 32px;
+}
+
+.vy-voice-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--vy-teal-primary), var(--vy-coral-primary), var(--vy-sage-green));
+}
+
+.vy-voice-prompt {
+    font-size: 21px;
+    font-weight: 700;
+    color: var(--vy-teal-primary);
+    margin-bottom: 24px;
+}
+
+/* Big Interactive Mic Button */
+.vy-mic-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 12px auto 20px;
+}
+
+.vy-mic-btn {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--vy-teal-primary), var(--vy-teal-light));
+    color: #ffffff;
+    border: 4px solid #ffffff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+    box-shadow: 0 10px 30px var(--vy-teal-glow), inset 0 2px 6px rgba(255, 255, 255, 0.4);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    z-index: 2;
+}
+
+.vy-mic-btn:hover {
+    transform: scale(1.06);
+    box-shadow: 0 14px 40px rgba(13, 92, 99, 0.35);
+}
+
+.vy-mic-btn.recording {
+    background: linear-gradient(135deg, var(--vy-coral-primary), var(--vy-coral-dark));
+    box-shadow: 0 10px 35px var(--vy-coral-glow);
+    animation: vyMicBeat 1.2s infinite;
+}
+
+/* Pulsing Ripples */
+.vy-ripple-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.vy-mic-btn.recording ~ .vy-ripple-ring:nth-child(2) {
+    border: 2px solid rgba(255, 107, 107, 0.6);
+    animation: vyRipple 2s infinite cubic-bezier(0, 0.2, 0.8, 1);
+}
+
+.vy-mic-btn.recording ~ .vy-ripple-ring:nth-child(3) {
+    border: 2px solid rgba(255, 107, 107, 0.4);
+    animation: vyRipple 2s infinite 0.6s cubic-bezier(0, 0.2, 0.8, 1);
+}
+
+.vy-mic-btn.recording ~ .vy-ripple-ring:nth-child(4) {
+    border: 2px solid rgba(255, 107, 107, 0.2);
+    animation: vyRipple 2s infinite 1.2s cubic-bezier(0, 0.2, 0.8, 1);
+}
+
+/* Waveform Bars */
+.vy-waveform-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    height: 38px;
+    margin: 12px 0 16px;
+}
+
+.vy-wave-bar {
+    width: 4px;
+    height: 10px;
+    background: var(--vy-coral-primary);
+    border-radius: 4px;
+    animation: vyWaveAnim 1.2s ease-in-out infinite;
+}
+
+.vy-wave-bar:nth-child(2) { animation-delay: 0.1s; }
+.vy-wave-bar:nth-child(3) { animation-delay: 0.2s; }
+.vy-wave-bar:nth-child(4) { animation-delay: 0.3s; }
+.vy-wave-bar:nth-child(5) { animation-delay: 0.4s; }
+.vy-wave-bar:nth-child(6) { animation-delay: 0.5s; }
+.vy-wave-bar:nth-child(7) { animation-delay: 0.6s; }
+
+.vy-mic-status-label {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--vy-teal-primary);
+    margin-bottom: 6px;
+}
+
+.vy-mic-timer {
+    display: inline-block;
+    background: var(--vy-coral-soft);
+    color: var(--vy-coral-dark);
+    font-weight: 800;
+    font-size: 14px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-top: 6px;
+}
+
+.vy-voice-hint {
+    font-size: 14px;
+    color: var(--vy-text-soft);
+    margin-top: 14px;
+}
+
+/* Conversation / Chat Stream */
+.vy-chat-section {
+    margin-bottom: 36px;
+}
+
+.vy-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.vy-section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--vy-font-heading);
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--vy-teal-primary);
+    margin: 0;
+}
+
+.vy-section-icon {
+    font-size: 24px;
+}
+
+.vy-chat-stream {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.vy-chat-bubble {
+    max-width: 86%;
+    padding: 18px 20px;
+    border-radius: 22px;
+    position: relative;
+    backdrop-filter: var(--vy-glass-blur);
+    -webkit-backdrop-filter: var(--vy-glass-blur);
+    box-shadow: var(--vy-glass-shadow);
+    line-height: 1.6;
+    font-size: 15.5px;
+    transition: transform 0.2s ease;
+}
+
+.vy-chat-bubble.user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.12), rgba(255, 107, 107, 0.05));
+    border: 1px solid rgba(255, 107, 107, 0.25);
+    border-bottom-right-radius: 6px;
+    color: #991B1B;
+}
+
+.vy-chat-bubble.assistant {
+    align-self: flex-start;
+    background: var(--vy-glass-card);
+    border: 1px solid var(--vy-glass-border);
+    border-bottom-left-radius: 6px;
+    color: var(--vy-text-main);
+}
+
+.vy-bubble-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--vy-teal-primary);
+}
+
+.vy-bubble-audio-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--vy-teal-soft);
+    border: 1px solid rgba(13, 92, 99, 0.2);
+    color: var(--vy-teal-primary);
+    border-radius: 50px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.vy-bubble-audio-btn:hover {
+    background: var(--vy-teal-primary);
+    color: #ffffff;
+}
+
+.vy-risk-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 13px;
+    margin-top: 10px;
+}
+
+.vy-risk-badge.high {
+    background: var(--vy-coral-soft);
+    color: var(--vy-coral-dark);
+    border: 1px solid rgba(224, 77, 77, 0.3);
+}
+
+.vy-risk-badge.medium {
+    background: var(--vy-sun-soft);
+    color: #C05621;
+    border: 1px solid rgba(244, 162, 97, 0.4);
+}
+
+.vy-risk-badge.low {
+    background: var(--vy-sage-soft);
+    color: #237A70;
+    border: 1px solid rgba(42, 157, 143, 0.3);
+}
+
+/* Quick Symptom Chips */
+.vy-quick-symptoms {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.vy-symptom-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #ffffff;
+    border: 1px solid rgba(13, 92, 99, 0.15);
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--vy-text-main);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.vy-symptom-chip:hover,
+.vy-symptom-chip.selected {
+    background: var(--vy-teal-soft);
+    border-color: var(--vy-teal-primary);
+    color: var(--vy-teal-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--vy-teal-glow);
+}
+
+/* Knowledge Library Cards Grid */
+.vy-knowledge-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 20px;
+    margin-bottom: 36px;
+}
+
+.vy-knowledge-card {
+    background: var(--vy-glass-card);
+    backdrop-filter: var(--vy-glass-blur);
+    -webkit-backdrop-filter: var(--vy-glass-blur);
+    border: 1px solid var(--vy-glass-border);
+    border-radius: 22px;
+    padding: 22px;
+    box-shadow: var(--vy-glass-shadow);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+}
+
+.vy-knowledge-card:hover {
+    transform: translateY(-4px);
+    background: var(--vy-glass-card-hover);
+    box-shadow: var(--vy-glass-shadow-lg);
+    border-color: rgba(13, 92, 99, 0.25);
+}
+
+.vy-kc-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    background: var(--vy-teal-soft);
+    color: var(--vy-teal-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 14px;
+}
+
+.vy-knowledge-card h4 {
+    margin: 0 0 8px;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--vy-teal-primary);
+    font-family: var(--vy-font-heading);
+}
+
+.vy-knowledge-card p {
+    font-size: 14px;
+    color: var(--vy-text-body);
+    line-height: 1.5;
+    margin: 0 0 16px;
+}
+
+.vy-kc-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid rgba(13, 92, 99, 0.08);
+    padding-top: 12px;
+}
+
+.vy-kc-tag {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--vy-teal-primary);
+    background: var(--vy-teal-soft);
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+.vy-audio-listen-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    color: var(--vy-coral-primary);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.vy-audio-listen-btn:hover {
+    color: var(--vy-coral-dark);
+}
+
+/* Emergency Floating & SOS Banner */
+.vy-emergency-banner {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.95), rgba(224, 77, 77, 0.95));
+    backdrop-filter: var(--vy-glass-blur);
+    color: #ffffff;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 12px 36px var(--vy-coral-glow);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 36px;
+}
+
+.vy-emergency-info h3 {
+    margin: 0 0 6px;
+    font-size: 20px;
+    font-weight: 800;
+    font-family: var(--vy-font-heading);
+}
+
+.vy-emergency-info p {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.95;
+}
+
+.vy-emergency-action-btn {
+    background: #ffffff;
+    color: var(--vy-coral-dark);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vy-emergency-action-btn:hover {
+    transform: scale(1.04);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* SOS Modal Dialog */
+.vy-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(13, 92, 99, 0.45);
+    backdrop-filter: blur(8px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: vyFadeIn 0.25s ease;
+}
+
+.vy-sos-modal {
+    background: #ffffff;
+    border-radius: 28px;
+    max-width: 520px;
+    width: 100%;
+    padding: 32px 26px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+    text-align: center;
+    position: relative;
+    border-top: 8px solid var(--vy-coral-primary);
+}
+
+.vy-sos-header-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--vy-coral-soft);
+    color: var(--vy-coral-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 16px;
+    animation: vyHeartbeat 1.5s infinite;
+}
+
+.vy-sos-modal h3 {
+    margin: 0 0 8px;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--vy-coral-dark);
+}
+
+.vy-sos-modal p {
+    font-size: 15px;
+    color: var(--vy-text-body);
+    margin: 0 0 24px;
+}
+
+.vy-sos-buttons-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.vy-sos-hotline-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-radius: 18px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.vy-sos-hotline-btn.ambulance {
+    background: linear-gradient(135deg, var(--vy-coral-primary), var(--vy-coral-dark));
+    color: #ffffff;
+    box-shadow: 0 6px 20px var(--vy-coral-glow);
+}
+
+.vy-sos-hotline-btn.asha {
+    background: var(--vy-teal-soft);
+    color: var(--vy-teal-primary);
+    border: 1px solid rgba(13, 92, 99, 0.2);
+}
+
+.vy-sos-hotline-btn.phc {
+    background: var(--vy-sun-soft);
+    color: #9C4221;
+    border: 1px solid rgba(244, 162, 97, 0.3);
+}
+
+.vy-sos-close-btn {
+    background: transparent;
+    border: 1px solid var(--vy-text-light);
+    color: var(--vy-text-muted);
+    padding: 10px 24px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Mobile Bottom Navigation Dock */
+.vy-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    backdrop-filter: var(--vy-glass-blur);
+    -webkit-backdrop-filter: var(--vy-glass-blur);
+    background: rgba(255, 255, 255, 0.92);
+    border-top: 1px solid var(--vy-glass-border-subtle);
+    box-shadow: 0 -6px 24px rgba(13, 92, 99, 0.08);
+    padding: 8px 12px 14px;
+}
+
+.vy-bottom-nav-inner {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.vy-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    text-decoration: none;
+    color: var(--vy-text-soft);
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 16px;
+    transition: all 0.2s ease;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.vy-nav-item .nav-icon {
+    font-size: 22px;
+}
+
+.vy-nav-item.active {
+    color: var(--vy-teal-primary);
+    font-weight: 800;
+    background: var(--vy-teal-soft);
+}
+
+.vy-nav-item.sos-item {
+    color: var(--vy-coral-primary);
+}
+
+.vy-nav-item.sos-item.active {
+    background: var(--vy-coral-soft);
+    color: var(--vy-coral-dark);
+}
+
+/* Keyframes */
+@keyframes vyRipple {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.9; }
+    100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
+}
+
+@keyframes vyMicBeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+
+@keyframes vyWaveAnim {
+    0%, 100% { height: 8px; }
+    50% { height: 32px; }
+}
+
+@keyframes vyBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+@keyframes vyHeartbeat {
+    0%, 100% { transform: scale(1); }
+    15% { transform: scale(1.15); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.1); }
+}
+
+@keyframes vyFadeIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .vy-hero-title {
+        font-size: 29px;
+    }
+    .vy-hero-subtitle {
+        font-size: 15px;
+    }
+    .vy-voice-card {
+        padding: 26px 16px;
+    }
+    .vy-mic-btn {
+        width: 96px;
+        height: 96px;
+        font-size: 36px;
+    }
+    .vy-emergency-banner {
+        flex-direction: column;
+        text-align: center;
+    }
+    .vy-emergency-action-btn {
+        width: 100%;
+    }
+}

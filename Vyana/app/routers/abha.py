@@ -1,9 +1,9 @@
-import os
 import time
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.database import get_db
 from app.models import Patient, Symptom
 from app.schemas import AbhaLinkRequest, AbhaVerifyRequest
@@ -13,7 +13,8 @@ router = APIRouter(prefix="/abha", tags=["abha"])
 
 
 def _abha_available() -> bool:
-    return bool(os.getenv("ABHA_SANDBOX_API_KEY", "").strip())
+    return bool(settings.abha_sandbox_api_key)
+
 
 
 @router.post("/verify")

@@ -316,3 +316,47 @@ def export_patient_pdf(patient_id: int, db: Session = Depends(get_db)):
         media_type="application/pdf",
         headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
+
+
+@router.get("/{patient_id}/history")
+def get_patient_history(patient_id: int, limit: int = 20, db: Session = Depends(get_db)):
+    try:
+        patient = db.query(Patient).filter(Patient.id == patient_id).first()
+        if not patient:
+            return error_response("Patient not found", 404)
+
+        symptoms = (
+            db.query(Symptom)
+            .filter(Symptom.patient_id == patient_id)
+            .order_by(Symptom.timestamp.desc())
+            .limit(limit)
+            .all()
+        )
+
+        history = []
+        for s in symptoms:
+            # Build conversation turns (user query + assistant advice)
+            user_text = s.transcription if s.transcription else (", ".join(s.symptoms_list) if s.symptoms_list else "Routine check")
+            history.append({
+                "id": f"symptom-{s.id}",
+                "timestamp": s.timestamp.strftime("%d %b, %I:%M %p"),
+                "iso_timestamp": s.timestamp.isoformat(),
+                "input_type": s.input_type,
+                "user_text": user_text,
+                "symptoms": s.symptoms_list or [],
+                "risk_score": s.risk_score,
+                "risk_level": s.risk_level,
+                "primary_reason": s.primary_reason,
+            })
+
+        return success_response({
+            "patient_id": patient.id,
+            "patient_name": patient.name,
+            "village": patient.village,
+            "pregnancy_week": patient.pregnancy_week,
+            "total_consultations": len(history),
+            "consultations": history,
+        })
+    except Exception as exc:
+        return error_response(f"Failed to fetch history: {exc}", 500)
+
