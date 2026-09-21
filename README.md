@@ -8,11 +8,11 @@
 [![Python](https://img.shields.io/badge/Python-3.11+-blue?style=for-the-badge&logo=python)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)](https://react.dev)
-[![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](../LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
 **India's First Voice-First, Offline-Resilient AI Maternal Health Companion & ASHA Triage Network**
 
-[Explore Live Web App](https://frontend-ayushs-projects-76f1503f.vercel.app) • [Interactive API Swagger Docs](https://vyana-care.onrender.com/docs) • [Deployment Runbook](PRODUCTION_DEPLOYMENT_RUNBOOK.md) • [Pitch Script](DEMO_SCRIPT.md)
+[Explore Live Web App](https://frontend-ayushs-projects-76f1503f.vercel.app) • [Interactive API Swagger Docs](https://vyana-care.onrender.com/docs) • [Deployment Runbook](Vyana/PRODUCTION_DEPLOYMENT_RUNBOOK.md) • [Pitch Script](Vyana/DEMO_SCRIPT.md)
 
 </div>
 
@@ -137,49 +137,53 @@ flowchart TD
 ## 📁 Repository Structure
 
 ```
-Vyana/
-├── app/                        # FastAPI Backend Application
-│   ├── main.py                 # FastAPI initialization & route registration
-│   ├── database.py             # SQLAlchemy engine & session management
-│   ├── models.py               # Database schemas (Patients, Symptoms, Alerts, Vaani)
-│   ├── schemas.py              # Pydantic request/response validation
-│   ├── routers/                # API Route modules
-│   │   ├── auth.py             # JWT, OTP & Refresh Token authentication
-│   │   ├── patient.py          # Patient registration, profiles, health records
-│   │   ├── symptom.py          # AI Symptom analysis & risk scoring
-│   │   ├── asha.py             # ASHA worker triage & alert actions
-│   │   ├── awaaz.py            # Vaani voice community & nurse moderation
-│   │   ├── district.py         # District analytics & GIS metrics
-│   │   ├── ivr.py              # Twilio IVR telephony flows
-│   │   ├── sync.py             # Offline batch sync & Bluetooth payloads
-│   │   ├── abha.py             # ABHA ID & ABDM registry simulation
-│   │   └── federated.py        # Federated learning round simulations
-│   └── services/               # Core business & AI integrations
-│       ├── ai_service.py       # Groq Whisper & Gemini 2.5 Flash pipeline
-│       ├── offline_engine.py   # Local offline symptom fuzzy matcher
-│       ├── notification.py     # Firebase & Twilio alerting engine
-│       └── security.py         # Encryption, hashing & DPDP workflows
-├── frontend/                   # React + Vite Frontend Application
-│   ├── public/                 # Static assets & Service Worker manifest
-│   ├── src/
-│   │   ├── api/                # Axios API client & backend endpoints
-│   │   ├── components/         # Reusable UI components (VoiceMic, SOSModal, etc.)
-│   │   ├── context/            # Global state (AuthContext, LanguageContext)
-│   │   ├── pages/              # Views (VyanaHome, AshaDashboard, DistrictDashboard, etc.)
-│   │   ├── App.jsx             # Router & layout composition
-│   │   └── main.jsx            # React root mount
-│   ├── package.json            # Frontend dependencies & scripts
-│   └── vite.config.js          # Vite configuration & proxy rules
-├── tests/                      # Automated test suite (Pytest)
-├── Dockerfile                  # Production containerization
-├── docker-compose.yml          # Multi-container orchestration (App + DB + Redis)
-├── render.yaml                 # Render infrastructure-as-code blueprint
-├── requirements.txt            # Python dependencies
-├── seed.py                     # Demo data seeding script
-├── DEMO_SCRIPT.md              # 3-Minute pitch & judging walkthrough
-├── ENV_SETUP_GUIDE.md          # Complete environment variable setup manual
-├── PRODUCTION_DEPLOYMENT_RUNBOOK.md # Production deployment handbook
-└── SECURITY_AND_PRIVACY.md     # DPDP Act compliance & threat model
+Vyana care/
+├── .gitignore                      # Git ignore configuration
+├── LICENSE                         # MIT License
+├── README.md                       # Root documentation (this file)
+└── Vyana/                          # Application Root
+    ├── app/                        # FastAPI Backend Application
+    │   ├── main.py                 # FastAPI initialization & route registration
+    │   ├── database.py             # SQLAlchemy engine & session management
+    │   ├── models.py               # Database schemas (Patients, Symptoms, Alerts, Vaani)
+    │   ├── schemas.py              # Pydantic request/response validation
+    │   ├── routers/                # API Route modules
+    │   │   ├── auth.py             # JWT, OTP & Refresh Token authentication
+    │   │   ├── patient.py          # Patient registration, profiles, health records
+    │   │   ├── symptom.py          # AI Symptom analysis & risk scoring
+    │   │   ├── asha.py             # ASHA worker triage & alert actions
+    │   │   ├── awaaz.py            # Vaani voice community & nurse moderation
+    │   │   ├── district.py         # District analytics & GIS metrics
+    │   │   ├── ivr.py              # Twilio IVR telephony flows
+    │   │   ├── sync.py             # Offline batch sync & Bluetooth payloads
+    │   │   ├── abha.py             # ABHA ID & ABDM registry simulation
+    │   │   └── federated.py        # Federated learning round simulations
+    │   └── services/               # Core business & AI integrations
+    │       ├── ai_service.py       # Groq Whisper & Gemini 2.5 Flash pipeline
+    │       ├── offline_engine.py   # Local offline symptom fuzzy matcher
+    │       ├── notification.py     # Firebase & Twilio alerting engine
+    │       └── security.py         # Encryption, hashing & DPDP workflows
+    ├── frontend/                   # React + Vite Frontend Application
+    │   ├── public/                 # Static assets & Service Worker manifest
+    │   ├── src/
+    │   │   ├── api/                # Axios API client & backend endpoints
+    │   │   ├── components/         # Reusable UI components (VoiceMic, SOSModal, etc.)
+    │   │   ├── context/            # Global state (AuthContext, LanguageContext)
+    │   │   ├── pages/              # Views (VyanaHome, AshaDashboard, DistrictDashboard, etc.)
+    │   │   ├── App.jsx             # Router & layout composition
+    │   │   └── main.jsx            # React root mount
+    │   ├── package.json            # Frontend dependencies & scripts
+    │   └── vite.config.js          # Vite configuration & proxy rules
+    ├── tests/                      # Automated test suite (Pytest)
+    ├── Dockerfile                  # Production containerization
+    ├── docker-compose.yml          # Multi-container orchestration (App + DB + Redis)
+    ├── render.yaml                 # Render infrastructure-as-code blueprint
+    ├── requirements.txt            # Python dependencies
+    ├── seed.py                     # Demo data seeding script
+    ├── DEMO_SCRIPT.md              # 3-Minute pitch & judging walkthrough
+    ├── ENV_SETUP_GUIDE.md          # Complete environment variable setup manual
+    ├── PRODUCTION_DEPLOYMENT_RUNBOOK.md # Production deployment handbook
+    └── SECURITY_AND_PRIVACY.md     # DPDP Act compliance & threat model
 ```
 
 ---
@@ -221,7 +225,7 @@ Swagger docs available at: **`http://127.0.0.1:8001/docs`**
 ### 3. Frontend Setup
 In a new terminal:
 ```powershell
-cd frontend
+cd "Vyana-care\Vyana\frontend"
 
 # Configure frontend environment
 copy .env.example .env
@@ -238,7 +242,7 @@ Frontend will be live at: **`http://localhost:5173`**
 
 Vyana Care supports flexible execution across local development (SQLite), staging, and production (PostgreSQL + Redis).
 
-Refer to [ENV_SETUP_GUIDE.md](ENV_SETUP_GUIDE.md) for full configuration options:
+Refer to [ENV_SETUP_GUIDE.md](Vyana/ENV_SETUP_GUIDE.md) for full configuration options:
 
 | Key | Description | Example / Default |
 | :--- | :--- | :--- |
@@ -284,7 +288,7 @@ Vyana Care is architected in strict adherence to **India's Digital Personal Data
 - **Data Minimization**: Audio recordings are processed in memory and discarded post-transcription unless explicitly opted into research.
 - **Granular Consent**: Explicit consent logs recorded before storing any maternal health metrics.
 - **Right to Erasure**: Complete purge workflows available via `/patient/delete-request`.
-- See [SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md) for detailed threat models and compliance matrices.
+- See [SECURITY_AND_PRIVACY.md](Vyana/SECURITY_AND_PRIVACY.md) for detailed threat models and compliance matrices.
 
 ---
 
@@ -292,4 +296,4 @@ Vyana Care is architected in strict adherence to **India's Digital Personal Data
 
 - **Developed with ❤️ by**: Ayush Kumar Singh ([@WhiteGod0227](https://github.com/WhiteGod0227))
 - **Live Demo Link**: [https://frontend-ayushs-projects-76f1503f.vercel.app](https://frontend-ayushs-projects-76f1503f.vercel.app)
-- **License**: [MIT License](../LICENSE)
+- **License**: [MIT License](LICENSE)

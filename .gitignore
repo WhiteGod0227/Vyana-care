@@ -1,0 +1,45 @@
+# Virtual environment
+.venv/
+venv/
+env/
+ENV/
+
+# Secrets and environment variables
+.env
+.env.*
+!.env.example
+*.env
+*.env.local
+*-firebase-adminsdk-*.json
+*.pem
+*.key
+*.cert
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Python cache & artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node & Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Static uploads & temporary media
+uploads/
+temp_audio/
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
